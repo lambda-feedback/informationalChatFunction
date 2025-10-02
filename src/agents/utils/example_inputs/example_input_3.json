@@ -1,0 +1,460 @@
+{
+  "message": "hi",
+  "params": {
+    "include_test_data": true,
+    "conversation_history": [
+      { "type": "user", "content": "hi" },
+      { "type": "ai", "content": "Hello! How can I help you today?" }
+    ],
+    "summary": "",
+    "conversational_style": "",
+    "question_response_details": {
+      "questionSubmissionSummary": [
+        {
+          "publishedPartId": "04d2cab2-eeca-4c1f-bcef-6401fe4ec635",
+          "publishedPartPosition": 0,
+          "publishedResponseAreaId": "1194c5b3-1831-433e-b78e-c96c94f99117",
+          "publishedResponseAreaPosition": 0,
+          "responseAreaUniversalId": "ee1df8dd-bccb-46d2-b816-1a707115495e",
+          "publishedResponseAreaPreResponseText": "$\\vec{a}+\\vec{b}=$",
+          "publishedResponseType": "MATRIX",
+          "publishedResponseConfig": { "cols": 1, "rows": 3 },
+          "totalSubmissions": 1,
+          "totalWrongSubmissions": 0,
+          "latestSubmission": {
+            "universalResponseAreaId": "ee1df8dd-bccb-46d2-b816-1a707115495e",
+            "answer": "[[\"-1\"],[\"5\"],[\"-1\"]]",
+            "submission": [["-1"], ["5"], ["-1"]],
+            "feedback": "Correct",
+            "rawResponse": {
+              "result": {
+                "feedback": "",
+                "is_correct": true,
+                "detailed_feedback": [
+                  [
+                    {
+                      "feedback": "",
+                      "is_correct": true,
+                      "response_latex": "-1",
+                      "response_simplified": "-1"
+                    }
+                  ],
+                  [
+                    {
+                      "feedback": "",
+                      "is_correct": true,
+                      "response_latex": "5",
+                      "response_simplified": "5"
+                    }
+                  ],
+                  [
+                    {
+                      "feedback": "",
+                      "is_correct": true,
+                      "response_latex": "-1",
+                      "response_simplified": "-1"
+                    }
+                  ]
+                ]
+              },
+              "command": "eval"
+            }
+          }
+        },
+        {
+          "publishedPartId": "04d2cab2-eeca-4c1f-bcef-6401fe4ec635",
+          "publishedPartPosition": 0,
+          "publishedResponseAreaId": "4e354eda-fb78-4c26-a3ae-f8d1c06297a2",
+          "publishedResponseAreaPosition": 1,
+          "responseAreaUniversalId": "7f7ad90a-0cfb-44e0-b5d7-6be585206508",
+          "publishedResponseAreaPreResponseText": "$\\vec{b}+\\vec{a}=$",
+          "publishedResponseType": "MATRIX",
+          "publishedResponseConfig": { "cols": 1, "rows": 3 },
+          "totalSubmissions": 1,
+          "totalWrongSubmissions": 0,
+          "latestSubmission": {
+            "universalResponseAreaId": "7f7ad90a-0cfb-44e0-b5d7-6be585206508",
+            "answer": "[[\"-1\"],[\"5\"],[\"-1\"]]",
+            "submission": [["-1"], ["5"], ["-1"]],
+            "feedback": "Correct",
+            "rawResponse": {
+              "result": {
+                "feedback": "",
+                "is_correct": true,
+                "detailed_feedback": [
+                  [
+                    {
+                      "feedback": "",
+                      "is_correct": true,
+                      "response_latex": "-1",
+                      "response_simplified": "-1"
+                    }
+                  ],
+                  [
+                    {
+                      "feedback": "",
+                      "is_correct": true,
+                      "response_latex": "5",
+                      "response_simplified": "5"
+                    }
+                  ],
+                  [
+                    {
+                      "feedback": "",
+                      "is_correct": true,
+                      "response_latex": "-1",
+                      "response_simplified": "-1"
+                    }
+                  ]
+                ]
+              },
+              "command": "eval"
+            }
+          }
+        },
+        {
+          "publishedPartId": "dbe25bc9-6c42-4e58-aac7-d15a783ef337",
+          "publishedPartPosition": 1,
+          "publishedResponseAreaId": "85c33011-0e12-435c-944e-399043e92779",
+          "publishedResponseAreaPosition": 0,
+          "responseAreaUniversalId": "bcf1b636-f188-4c68-a59a-c153fb4419d2",
+          "publishedResponseAreaPreResponseText": "$3\\vec{c}=$",
+          "publishedResponseType": "MATRIX",
+          "publishedResponseConfig": { "cols": 1, "rows": 3 },
+          "totalSubmissions": 0,
+          "totalWrongSubmissions": 0
+        },
+        {
+          "publishedPartId": "dbe25bc9-6c42-4e58-aac7-d15a783ef337",
+          "publishedPartPosition": 1,
+          "publishedResponseAreaId": "ae4a9db7-ff54-489d-9a21-143621e6e7aa",
+          "publishedResponseAreaPosition": 1,
+          "responseAreaUniversalId": "bfab6be0-11bd-4799-ba10-1e9a0182da36",
+          "publishedResponseAreaPreResponseText": "$-\\vec{a}=$",
+          "publishedResponseType": "MATRIX",
+          "publishedResponseConfig": { "cols": 1, "rows": 3 },
+          "totalSubmissions": 0,
+          "totalWrongSubmissions": 0
+        },
+        {
+          "publishedPartId": "dbe25bc9-6c42-4e58-aac7-d15a783ef337",
+          "publishedPartPosition": 1,
+          "publishedResponseAreaId": "3ae38184-9dbc-4c5f-872b-75ddfd691b20",
+          "publishedResponseAreaPosition": 2,
+          "responseAreaUniversalId": "170e2cf2-9d0d-438e-a406-cafe7ff1017b",
+          "publishedResponseAreaPreResponseText": "$\\frac{\\vec{b}}{2}=$",
+          "publishedResponseType": "MATRIX",
+          "publishedResponseConfig": { "cols": 1, "rows": 3 },
+          "totalSubmissions": 0,
+          "totalWrongSubmissions": 0
+        },
+        {
+          "publishedPartId": "2cb9d565-8f1c-4901-bf2b-0b89f12ec9e2",
+          "publishedPartPosition": 2,
+          "publishedResponseAreaId": "6c64c869-358d-477d-b835-7c5e268b08b2",
+          "publishedResponseAreaPosition": 0,
+          "responseAreaUniversalId": "dfa4be9e-c9e2-442d-95a4-c2c61d25fe51",
+          "publishedResponseAreaPreResponseText": "$3\\vec{a}-3\\vec{c}=$",
+          "publishedResponseType": "MATRIX",
+          "publishedResponseConfig": { "cols": 1, "rows": 3 },
+          "totalSubmissions": 0,
+          "totalWrongSubmissions": 0
+        },
+        {
+          "publishedPartId": "2cb9d565-8f1c-4901-bf2b-0b89f12ec9e2",
+          "publishedPartPosition": 2,
+          "publishedResponseAreaId": "0b5d2dab-7c6d-4694-8c3b-56df1afaba96",
+          "publishedResponseAreaPosition": 1,
+          "responseAreaUniversalId": "e695440a-65b8-4ebd-b055-6173d9d84148",
+          "publishedResponseAreaPreResponseText": "$3(\\vec{a}-\\vec{c})=$",
+          "publishedResponseType": "MATRIX",
+          "publishedResponseConfig": { "cols": 1, "rows": 3 },
+          "totalSubmissions": 0,
+          "totalWrongSubmissions": 0
+        },
+        {
+          "publishedPartId": "3ee15335-1bfc-466a-8fff-66abd742dc33",
+          "publishedPartPosition": 3,
+          "publishedResponseAreaId": "8a4d3fed-e450-475d-a09b-1e58f8dbbbe2",
+          "publishedResponseAreaPosition": 0,
+          "responseAreaUniversalId": "4fd2eb4f-dec2-4695-9148-09104935d431",
+          "publishedResponseAreaPreResponseText": "$-5(\\vec{a}+\\vec{c})+\\vec{b}=$",
+          "publishedResponseType": "MATRIX",
+          "publishedResponseConfig": { "cols": 1, "rows": 3 },
+          "totalSubmissions": 0,
+          "totalWrongSubmissions": 0
+        },
+        {
+          "publishedPartId": "b2620eb0-9de6-404e-a82c-b4ad8e015d40",
+          "publishedPartPosition": 4,
+          "publishedResponseAreaId": "1a5fb3fb-001d-4ed5-9606-2a73fcae036c",
+          "publishedResponseAreaPosition": 0,
+          "responseAreaUniversalId": "c98844ba-3fd2-4154-8713-1d76bfaf610c",
+          "publishedResponseAreaPreResponseText": "$3\\vec{a}-2\\vec{c}+3\\vec{b}=$",
+          "publishedResponseType": "MATRIX",
+          "publishedResponseConfig": { "cols": 1, "rows": 3 },
+          "totalSubmissions": 0,
+          "totalWrongSubmissions": 0
+        }
+      ],
+      "questionInformation": {
+        "questionTitle": "Vector Arithmetics",
+        "questionGuidance": null,
+        "questionContent": "$$\n\\vec{a}=\\begin{bmatrix}1 \\\\ 2\\\\ 3\\end{bmatrix} \\quad \\vec{b}=\\begin{bmatrix}-2 \\\\ 3\\\\ -4\\end{bmatrix} \\quad \\vec{c}=\\begin{bmatrix} 0 \\\\\\ 4\\\\ -1\\end{bmatrix}\n$$",
+        "durationLowerBound": 1,
+        "durationUpperBound": 3,
+        "parts": [
+          {
+            "publishedPartId": "04d2cab2-eeca-4c1f-bcef-6401fe4ec635",
+            "publishedPartPosition": 0,
+            "publishedPartContent": "",
+            "publishedPartAnswerContent": "",
+            "publishedWorkedSolutionSections": [
+              {
+                "id": "9cb3a347-c05f-4101-b522-a0c6d2fbc6bf",
+                "position": 0,
+                "title": "",
+                "content": "As we made no mention that the vectors are represented in different basis, we can assume that they all share the same basis set.\n\n&#x20; &#x20;\n\n$$\n\\begin{array}{rl}\n\\vec{a}+\\vec{b} &=\\begin{bmatrix}1 \\\\ 2\\\\ 3\\end{bmatrix}+\\begin{bmatrix}-2 \\\\ 3\\\\ -4\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}1-2 \\\\ 2+3\\\\ 3-4\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}-1 \\\\ 5\\\\ -1\\end{bmatrix}\n\\end{array}\n$$\n\n&#x20; &#x20;\n\n***\n\n&#x20; &#x20;\n\nSince vector addition is commutative, $\\vec{b}+\\vec{a}=\\vec{a}+\\vec{b}$\n"
+              }
+            ],
+            "publishedResponseAreas": [
+              {
+                "id": "1194c5b3-1831-433e-b78e-c96c94f99117",
+                "position": 0,
+                "universalResponseAreaId": "ee1df8dd-bccb-46d2-b816-1a707115495e",
+                "preResponseText": "$\\vec{a}+\\vec{b}=$",
+                "Response": {
+                  "id": "0c40d7de-15a0-4916-af34-5ee2b330f3dd",
+                  "responseType": "MATRIX",
+                  "config": { "cols": 1, "rows": 3 },
+                  "answer": [["-1"], ["5"], ["-1"]]
+                },
+                "responseType": "MATRIX",
+                "answer": [["-1"], ["5"], ["-1"]]
+              },
+              {
+                "id": "4e354eda-fb78-4c26-a3ae-f8d1c06297a2",
+                "position": 1,
+                "universalResponseAreaId": "7f7ad90a-0cfb-44e0-b5d7-6be585206508",
+                "preResponseText": "$\\vec{b}+\\vec{a}=$",
+                "Response": {
+                  "id": "a01003b5-f11d-4d06-9ec2-35efc11b7b64",
+                  "responseType": "MATRIX",
+                  "config": { "cols": 1, "rows": 3 },
+                  "answer": [["-1"], ["5"], ["-1"]]
+                },
+                "responseType": "MATRIX",
+                "answer": [["-1"], ["5"], ["-1"]]
+              }
+            ]
+          },
+          {
+            "publishedPartId": "dbe25bc9-6c42-4e58-aac7-d15a783ef337",
+            "publishedPartPosition": 1,
+            "publishedPartContent": "",
+            "publishedPartAnswerContent": "",
+            "publishedWorkedSolutionSections": [
+              {
+                "id": "7d696718-c6f5-4e11-a5fb-bd122c1274cf",
+                "position": 0,
+                "title": "$3\\vec{c}$",
+                "content": "$$\n\\begin{array}{rl}\n3\\vec{c}&=3\\begin{bmatrix}0 \\\\ 4\\\\ -1\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}3\\cdot0 \\\\ 3\\cdot4\\\\ 3\\cdot-1\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}0 \\\\ 12\\\\ -3\\end{bmatrix}\n\\end{array}\n$$"
+              },
+              {
+                "id": "8134095d-f49e-4834-b8de-12baa9625d7c",
+                "position": 0,
+                "title": "",
+                "content": ""
+              },
+              {
+                "id": "010b312d-2699-439f-bcab-9f8ac4b96114",
+                "position": 1,
+                "title": "$-\\vec{a}$",
+                "content": "$$\n\\begin{array}{rl}\n-\\vec{a}&=3\\begin{bmatrix}1 \\\\ 2\\\\ 3\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}-1\\cdot1 \\\\ -1\\cdot2\\\\ -1\\cdot3\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}-1 \\\\ -2\\\\ -3\\end{bmatrix}\n\\end{array}\n$$"
+              },
+              {
+                "id": "20602e93-de57-4e69-afcd-e05f454155de",
+                "position": 2,
+                "title": "$\\frac{\\vec{b}}{2}$",
+                "content": "$$\n\\begin{array}{rl}\n\\frac{\\vec{b}}{2}&=\\frac{1}{2}\\begin{bmatrix}-2 \\\\ 3\\\\ -4\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}\\frac{1}{2}\\cdot-2 \\\\ \\frac{1}{2}\\cdot3\\\\ \\frac{1}{2}\\cdot-4\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}-1 \\\\ 1.5\\\\ -2\\end{bmatrix}\n\\end{array}\n$$"
+              }
+            ],
+            "publishedResponseAreas": [
+              {
+                "id": "85c33011-0e12-435c-944e-399043e92779",
+                "position": 0,
+                "universalResponseAreaId": "bcf1b636-f188-4c68-a59a-c153fb4419d2",
+                "preResponseText": "$3\\vec{c}=$",
+                "Response": {
+                  "id": "8623c885-b49d-476e-b316-f45a5052cacd",
+                  "responseType": "MATRIX",
+                  "config": { "cols": 1, "rows": 3 },
+                  "answer": [["0"], ["12"], ["-3"]]
+                },
+                "responseType": "MATRIX",
+                "answer": [["0"], ["12"], ["-3"]]
+              },
+              {
+                "id": "ae4a9db7-ff54-489d-9a21-143621e6e7aa",
+                "position": 1,
+                "universalResponseAreaId": "bfab6be0-11bd-4799-ba10-1e9a0182da36",
+                "preResponseText": "$-\\vec{a}=$",
+                "Response": {
+                  "id": "150494b9-1ed6-44f3-8d52-8bdbd74f7c75",
+                  "responseType": "MATRIX",
+                  "config": { "cols": 1, "rows": 3 },
+                  "answer": [["-1"], ["-2"], ["-3"]]
+                },
+                "responseType": "MATRIX",
+                "answer": [["-1"], ["-2"], ["-3"]]
+              },
+              {
+                "id": "3ae38184-9dbc-4c5f-872b-75ddfd691b20",
+                "position": 2,
+                "universalResponseAreaId": "170e2cf2-9d0d-438e-a406-cafe7ff1017b",
+                "preResponseText": "$\\frac{\\vec{b}}{2}=$",
+                "Response": {
+                  "id": "ed65b833-5cb6-4198-aa2f-a5b74d86b3f1",
+                  "responseType": "MATRIX",
+                  "config": { "cols": 1, "rows": 3 },
+                  "answer": [["-1"], ["1.5"], ["-2"]]
+                },
+                "responseType": "MATRIX",
+                "answer": [["-1"], ["1.5"], ["-2"]]
+              }
+            ]
+          },
+          {
+            "publishedPartId": "2cb9d565-8f1c-4901-bf2b-0b89f12ec9e2",
+            "publishedPartPosition": 2,
+            "publishedPartContent": "",
+            "publishedPartAnswerContent": "",
+            "publishedWorkedSolutionSections": [
+              {
+                "id": "8162a17d-bed7-48a9-b487-0bd6280a3988",
+                "position": 0,
+                "title": "$3\\vec{a}-3\\vec{c}$",
+                "content": "$$\n\\begin{array}{rl}\n3\\vec{a}-3\\vec{c} &=3\\begin{bmatrix}1 \\\\ 2\\\\ 3\\end{bmatrix}-3\\begin{bmatrix}0 \\\\ 4\\\\ -1\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}3 \\\\ 6\\\\ 9\\end{bmatrix}-\\begin{bmatrix}0 \\\\ 12\\\\ -3\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}3-0 \\\\ 6-12\\\\ 9-(-3)\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}3 \\\\ -6\\\\ 12\\end{bmatrix}\n\\end{array}\n$$"
+              },
+              {
+                "id": "7526f2d6-baf1-4aea-bb9f-6486f7233f97",
+                "position": 0,
+                "title": "",
+                "content": "As we made no mention that the vectors are represented in different basis, we can assume that they all share the same basis set.\n\n&#x20; &#x20;\n\n$$\n\\begin{array}{rl}\n3\\vec{a}-2\\vec{c}+3\\vec{b} &=3\\begin{bmatrix}1 \\\\ 2\\\\ 3\\end{bmatrix}-2\\begin{bmatrix}0 \\\\ 4\\\\ -1\\end{bmatrix}+3\\begin{bmatrix}-2 \\\\ 3\\\\ -4\\end{bmatrix}\n\\\\\\\\\n&= 3\\left(\\begin{bmatrix}1 \\\\ 2\\\\ 3\\end{bmatrix}+\\begin{bmatrix}-2 \\\\ 3\\\\ -4\\end{bmatrix}\\right)-2\\begin{bmatrix}0 \\\\ 4\\\\ -1\\end{bmatrix}\n\\\\\\\\\n&= 3\\begin{bmatrix}1-2 \\\\ 2+3\\\\ 3-4\\end{bmatrix}-2\\begin{bmatrix}0 \\\\ 4\\\\ -1\\end{bmatrix}\n\\\\\\\\\n&= 3\\begin{bmatrix}-1 \\\\ 5\\\\ -1\\end{bmatrix}-2\\begin{bmatrix}0 \\\\ 4\\\\ -1\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}-3 \\\\ 15\\\\ -3\\end{bmatrix}+\\begin{bmatrix}0 \\\\ -8\\\\ 2\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}-3+0 \\\\ 15-8\\\\ -3+2\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}-3 \\\\ 7\\\\ -1\\end{bmatrix}\n\\end{array}\n$$"
+              },
+              {
+                "id": "9d88d02a-e63d-40d0-8200-5d81718e2259",
+                "position": 1,
+                "title": "$3(\\vec{a}-\\vec{c})$",
+                "content": "$$\n\\begin{array}{rl}\n3(\\vec{a}-\\vec{c}) &=3\\left(\\begin{bmatrix}1 \\\\ 2\\\\ 3\\end{bmatrix}-\\begin{bmatrix}0 \\\\ 4\\\\ -1\\end{bmatrix}\\right)\n\\\\\\\\\n&= 3\\begin{bmatrix}1-0 \\\\ 2-4\\\\ 3-(-1)\\end{bmatrix}\n\\\\\\\\\n&= 3\\begin{bmatrix}1 \\\\ -2\\\\ 4\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}3 \\\\ -6\\\\ 12\\end{bmatrix}\n\\end{array}\n$$"
+              }
+            ],
+            "publishedResponseAreas": [
+              {
+                "id": "6c64c869-358d-477d-b835-7c5e268b08b2",
+                "position": 0,
+                "universalResponseAreaId": "dfa4be9e-c9e2-442d-95a4-c2c61d25fe51",
+                "preResponseText": "$3\\vec{a}-3\\vec{c}=$",
+                "Response": {
+                  "id": "53199f12-d660-4ffe-95ae-9d28c9f260ba",
+                  "responseType": "MATRIX",
+                  "config": { "cols": 1, "rows": 3 },
+                  "answer": [["3"], ["-6"], ["12"]]
+                },
+                "responseType": "MATRIX",
+                "answer": [["3"], ["-6"], ["12"]]
+              },
+              {
+                "id": "0b5d2dab-7c6d-4694-8c3b-56df1afaba96",
+                "position": 1,
+                "universalResponseAreaId": "e695440a-65b8-4ebd-b055-6173d9d84148",
+                "preResponseText": "$3(\\vec{a}-\\vec{c})=$",
+                "Response": {
+                  "id": "c189d436-d5a4-4c61-b26e-95ac30c281b5",
+                  "responseType": "MATRIX",
+                  "config": { "cols": 1, "rows": 3 },
+                  "answer": [["3"], ["-6"], ["12"]]
+                },
+                "responseType": "MATRIX",
+                "answer": [["3"], ["-6"], ["12"]]
+              }
+            ]
+          },
+          {
+            "publishedPartId": "3ee15335-1bfc-466a-8fff-66abd742dc33",
+            "publishedPartPosition": 3,
+            "publishedPartContent": "",
+            "publishedPartAnswerContent": "",
+            "publishedWorkedSolutionSections": [
+              {
+                "id": "916cf686-7a41-4169-8fa2-b2e9d6924375",
+                "position": 0,
+                "title": "",
+                "content": "As we made no mention that the vectors are represented in different basis, we can assume that they all share the same basis set.\n\n&#x20; &#x20;\n\n$$\n\\begin{array}{rl}\n-5(\\vec{a}+\\vec{c})+\\vec{b} &=-5\\left(\\begin{bmatrix}1 \\\\ 2\\\\ 3\\end{bmatrix}+\\begin{bmatrix}0 \\\\ 4\\\\ -1\\end{bmatrix}\\right)+\\begin{bmatrix}-2 \\\\ 3\\\\ -4\\end{bmatrix}\n\\\\\\\\\n&= -5\\begin{bmatrix}1 \\\\ 2\\\\ 3\\end{bmatrix}-5\\begin{bmatrix}0 \\\\ 4\\\\ -1\\end{bmatrix}+\\begin{bmatrix}-2 \\\\ 3\\\\ -4\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}-5 \\\\ -10\\\\ -15\\end{bmatrix}+\\begin{bmatrix}0 \\\\ -20\\\\ 5\\end{bmatrix}+\\begin{bmatrix}-2 \\\\ 3\\\\ -4\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}-5+0-2 \\\\ -10-20+3\\\\ -15+5-4\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}-7 \\\\ -27\\\\ -14\\end{bmatrix}\n\\end{array}\n$$"
+              }
+            ],
+            "publishedResponseAreas": [
+              {
+                "id": "8a4d3fed-e450-475d-a09b-1e58f8dbbbe2",
+                "position": 0,
+                "universalResponseAreaId": "4fd2eb4f-dec2-4695-9148-09104935d431",
+                "preResponseText": "$-5(\\vec{a}+\\vec{c})+\\vec{b}=$",
+                "Response": {
+                  "id": "eeb448a9-81b9-4f4d-836f-d04029aa449c",
+                  "responseType": "MATRIX",
+                  "config": { "cols": 1, "rows": 3 },
+                  "answer": [["-7"], ["-27"], ["-14"]]
+                },
+                "responseType": "MATRIX",
+                "answer": [["-7"], ["-27"], ["-14"]]
+              }
+            ]
+          },
+          {
+            "publishedPartId": "b2620eb0-9de6-404e-a82c-b4ad8e015d40",
+            "publishedPartPosition": 4,
+            "publishedPartContent": "",
+            "publishedPartAnswerContent": "",
+            "publishedWorkedSolutionSections": [
+              {
+                "id": "3d15fcbc-5173-4d89-a13a-3296c25680ec",
+                "position": 0,
+                "title": "",
+                "content": "As we made no mention that the vectors are represented in different basis, we can assume that they all share the same basis set.\n\n&#x20; &#x20;\n\n$$\n\\begin{array}{rl}\n3\\vec{a}-2\\vec{c}+3\\vec{b} &=3\\begin{bmatrix}1 \\\\ 2\\\\ 3\\end{bmatrix}-2\\begin{bmatrix}0 \\\\ 4\\\\ -1\\end{bmatrix}+3\\begin{bmatrix}-2 \\\\ 3\\\\ -4\\end{bmatrix}\n\\\\\\\\\n&= 3\\left(\\begin{bmatrix}1 \\\\ 2\\\\ 3\\end{bmatrix}+\\begin{bmatrix}-2 \\\\ 3\\\\ -4\\end{bmatrix}\\right)-2\\begin{bmatrix}0 \\\\ 4\\\\ -1\\end{bmatrix}\n\\\\\\\\\n&= 3\\begin{bmatrix}1-2 \\\\ 2+3\\\\ 3-4\\end{bmatrix}-2\\begin{bmatrix}0 \\\\ 4\\\\ -1\\end{bmatrix}\n\\\\\\\\\n&= 3\\begin{bmatrix}-1 \\\\ 5\\\\ -1\\end{bmatrix}-2\\begin{bmatrix}0 \\\\ 4\\\\ -1\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}-3 \\\\ 15\\\\ -3\\end{bmatrix}+\\begin{bmatrix}0 \\\\ -8\\\\ 2\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}-3+0 \\\\ 15-8\\\\ -3+2\\end{bmatrix}\n\\\\\\\\\n&= \\begin{bmatrix}-3 \\\\ 7\\\\ -1\\end{bmatrix}\n\\end{array}\n$$"
+              }
+            ],
+            "publishedResponseAreas": [
+              {
+                "id": "1a5fb3fb-001d-4ed5-9606-2a73fcae036c",
+                "position": 0,
+                "universalResponseAreaId": "c98844ba-3fd2-4154-8713-1d76bfaf610c",
+                "preResponseText": "$3\\vec{a}-2\\vec{c}+3\\vec{b}=$",
+                "Response": {
+                  "id": "c5f1c9a9-eb13-4b2e-83ad-f9a3bd87a056",
+                  "responseType": "MATRIX",
+                  "config": { "cols": 1, "rows": 3 },
+                  "answer": [["-3"], ["7"], ["-1"]]
+                },
+                "responseType": "MATRIX",
+                "answer": [["-3"], ["7"], ["-1"]]
+              }
+            ]
+          }
+        ]
+      },
+      "questionAccessInformation": {
+        "estimatedMinimumTime": "1 minute",
+        "estimaredMaximumTime": "3 minutes",
+        "timeTaken": "13 minutes",
+        "accessStatus": "too much time spent on this question.",
+        "markedDone": "Part (a) was marked done",
+        "currentPart": {
+          "id": "04d2cab2-eeca-4c1f-bcef-6401fe4ec635",
+          "position": 0
+        }
+      }
+    },
+    "conversation_id": "2f95c229-af43-4c1f-918a-0fd428178acf",
+    "agent_type": "base"
+  }
+}

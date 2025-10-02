@@ -1,0 +1,14 @@
+langchain
+langchain-chroma
+langchain-community
+langchain-core
+langchain-openai
+langchain_google_genai
+langchain-text-splitters
+langchainhub
+langdetect
+langgraph
+langsmith
+
+lf_toolkit[ipc] @ git+https://github.com/lambda-feedback/toolkit-python.git@main
+pytest

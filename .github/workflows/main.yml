@@ -1,0 +1,89 @@
+name: Main deployment of Chatbot lambda function
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Staging deployment tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.13"]
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+      GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
+      GOOGLE_AI_MODEL: ${{ vars.GOOGLE_AI_MODEL }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        id: python-setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # - name: Load cached venv
+      #   id: dependencies-cache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: .venv
+      #     key: venv-${{ runner.os }}-${{ steps.python-setup.outputs.python-version }}
+
+      - name: Create Venv if Cache not found
+        # if: steps.dependencies-cache.outputs.cache-hit != 'true'
+        run: |
+          python -m venv .venv
+
+      - name: Install dependencies
+        # if: steps.dependencies-cache.outputs.cache-hit != 'true'
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        if: always()
+        run: |
+          source .venv/bin/activate
+          pytest --junit-xml=./reports/pytest.xml --tb=auto -v
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: ./reports/pytest.xml
+          if-no-files-found: warn
+
+  build:
+    name: Build Docker Image
+    uses: lambda-feedback/chat-function-workflows/.github/workflows/gh_build.yml@main
+    needs: test
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+
+  deploy:
+    name: Deploy to Lambda Feedback
+    uses: lambda-feedback/chat-function-workflows/.github/workflows/main_deploy.yml@main
+    needs: test
+    with:
+      template-repository-name: "lambda-feedback/chat-function-boilerplate"
+      # allow for developer to specify the environment variables that are used by the deployed AWS Lambda. Default to mock then admin can update.
+      deployed-environment-variables: '[\"OPENAI_API_KEY\",\"OPENAI_MODEL\",\"GOOGLE_AI_API_KEY\",\"GOOGLE_AI_MODEL\"]'
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+      issues: write
+    secrets:
+      aws-access-key-id: ${{ secrets.LAMBDA_CONTAINER_PIPELINE_AWS_ID }}
+      aws-secret-key: ${{ secrets.LAMBDA_CONTAINER_PIPELINE_AWS_SECRET}}
+      function-admin-api-key: ${{ secrets.FUNCTION_ADMIN_API_KEY }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}
