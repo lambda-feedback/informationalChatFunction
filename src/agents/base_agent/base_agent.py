@@ -35,9 +35,9 @@ class State(TypedDict):
 
 class BaseAgent:
     def __init__(self):
-        llm = OpenAILLMs()                  # OpenAILLMs() or GoogleAILLMs()
+        llm = GoogleAILLMs()                  # OpenAILLMs() or GoogleAILLMs()
         self.llm = llm.get_llm()
-        summarisation_llm = OpenAILLMs()    # OpenAILLMs() or GoogleAILLMs()
+        summarisation_llm = GoogleAILLMs()    # OpenAILLMs() or GoogleAILLMs()
         self.summarisation_llm = summarisation_llm.get_llm()
         self.summary = ""
         self.conversationalStyle = ""
