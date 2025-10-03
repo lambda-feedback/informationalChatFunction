@@ -76,6 +76,7 @@ class PartDetails:
         publishedPartContent: Optional[str] = None,
         publishedPartAnswerContent: Optional[str] = None,
         publishedWorkedSolutionSections: Optional[List[dict]] = [],
+        publishedStructuredTutorialSections: Optional[List[dict]] = [],
         publishedResponseAreas: Optional[List[Optional[ResponseAreaDetails]]] = [],
     ):
         self.publishedPartId = publishedPartId
@@ -83,6 +84,7 @@ class PartDetails:
         self.publishedPartContent = publishedPartContent
         self.publishedPartAnswerContent = publishedPartAnswerContent
         self.publishedWorkedSolutionSections = publishedWorkedSolutionSections
+        self.publishedStructuredTutorialSections = publishedStructuredTutorialSections
         self.publishedResponseAreas = [ResponseAreaDetails(**publishedResponseArea) for publishedResponseArea in publishedResponseAreas]
 
 class QuestionDetails:
@@ -277,9 +279,20 @@ def _format_single_part(
                 'content': ws.get('content', ''),
                 'position': ws.get('position', 0)
             })
+
+    #  6. Structured Tutorial Sections
+    tutorial_data = []
+    if part.publishedStructuredTutorialSections:
+        for ts in part.publishedStructuredTutorialSections:
+            tutorial_data.append({
+                'title': ts.get('title', ''),
+                'content': ts.get('content', ''),
+                'position': ts.get('position', 0)
+            })
     
     part_sections.append(PromptFormatter.format_worked_solutions(solutions_data))
-    
+    part_sections.append(PromptFormatter.format_structured_tutorials(tutorial_data))
+
     return "\n".join(part_sections) + "\n---\n"
 
 

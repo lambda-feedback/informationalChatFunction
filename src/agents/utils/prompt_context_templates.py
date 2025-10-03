@@ -212,6 +212,22 @@ Use British English spellings.
 {"\n".join(solution_texts)}"""
 
     @staticmethod
+    def format_structured_tutorials(tutorials: List[Dict[str, Any]]) -> str:
+        """Format structured tutorials section."""
+        if not tutorials:
+            return "### Structured Tutorials\n\nNone available"
+        
+        tutorial_texts = []
+        for i, tutorial in enumerate(tutorials):
+            title = tutorial.get('title', f'Tutorial {i + 1}')
+            content = tutorial.get('content', '').strip() or 'No content available'
+            tutorial_texts.append(f"#### {title}\n\n{content}")
+        
+        return f"""### Structured Tutorials
+
+{"\n".join(tutorial_texts)}"""
+
+    @staticmethod
     def format_complete_prompt(sections: List[str]) -> str:
         """Combine all sections into a complete, well-structured prompt."""
         
