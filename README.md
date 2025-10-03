@@ -95,13 +95,20 @@ You agent can be based on an LLM hosted anywhere, you have available currently O
     main.yml                          # deploys the STAGING function to Lambda Feedback
     test-report.yml                   # gathers Pytest Report of function tests
 
+docs/               # docs for devs and users
+
 src/module.py       # chat_module function implementation
 src/module_test.py  # chat_module function tests
 src/agents/         # find all agents developed for the chat functionality
 src/agents/utils/test_prompts.py      # allows testing of any LLM agent on a couple of example inputs containing Lambda Feedback Questions and synthetic student conversations
 ```
 
-## Run the Chat Script
+
+## Testing the Chat Function
+
+To test your function, you can either call the code directly through a python script. Or you can build the respective chat function docker container locally and call it through an API request. Below you can find details on those processes.
+
+### Run the Chat Script
 
 You can run the Python function itself. Make sure to have a main function in either `src/module.py` or `index.py`.
 
@@ -114,7 +121,7 @@ You can also use the `testbench_agents.py` script to test the agents with exampl
 python src/agents/utils/testbench_agents.py
 ```
 
-### Building the Docker Image
+### Calling the Docker Image Locally
 
 To build the Docker image, run the following command:
 
@@ -122,17 +129,17 @@ To build the Docker image, run the following command:
 docker build -t llm_chat .
 ```
 
-### Running the Docker Image
+#### Running the Docker Image
 
 To run the Docker image, use the following command:
 
-#### Without .env file:
+##### A. Without .env file:
 
 ```bash
 docker run -e OPENAI_API_KEY={your key} -e OPENAI_MODEL={your LLM chosen model name} -p 8080:8080 llm_chat
 ```
 
-#### With container name (for interaction, e.g. copying file from inside the docker container):
+##### B. With container name (for interaction, e.g. copying file from inside the docker container):
 
 ```bash
 docker run --env-file .env -it --name my-lambda-container -p 8080:8080 llm_chat
@@ -143,10 +150,15 @@ This will start the chat function and expose it on port `8080` and it will be op
 ```bash
 curl --location 'http://localhost:8080/2015-03-31/functions/function/invocations' \
 --header 'Content-Type: application/json' \
---data '{"body":"{\"message\": \"hi\", \"params\": {\"conversation_id\": \"12345Test\", \"conversation_history\": [{\"type\": \"user\", \"content\": \"hi\"}]}}"}'
+--data '{"body":"{\"message\": \"hi\", \"params\": {\"conversation_id\": \"12345Test\", \"conversation_history\": [{\"type\": \"user\", 
 ```
 
-### Call Docker Container From Postman
+#### Call Docker Container
+##### A. Call Docker with Python Requests
+
+In the `src/agents/utils` folder you can find the `requests_testscript.py` script that calls the POST URL of the running docker container. It reads any kind of input files with the expected schema. You can use this to test your curl calls of the chatbot.
+
+##### B. Call Docker Container through API request
 
 POST URL:
 
@@ -154,7 +166,7 @@ POST URL:
 http://localhost:8080/2015-03-31/functions/function/invocations
 ```
 
-Body:
+Body (stringified within body for API request):
 
 ```JSON
 {"body":"{\"message\": \"hi\", \"params\": {\"conversation_id\": \"12345Test\", \"conversation_history\": [{\"type\": \"user\", \"content\": \"hi\"}]}}"}
@@ -175,10 +187,6 @@ Body with optional Params:
     }
 }
 ```
-
-### Call Docker with Python Requests
-
-In the `src/agents/utils` folder you can find the `requests_test.py` script that calls the POST URL of the running docker container. It reads any kind of input files with the expected schema. You can use this to test your curl calls of the chatbot.
 
 ### Deploy to Lambda Feedback
 
@@ -206,3 +214,28 @@ Make sure that all run-time dependencies are installed in the Docker image.
 - System packages: If you need to install system packages, add the installation command to the Dockerfile.
 - ML models: If your chat function depends on ML models, make sure to include them in the Docker image.
 - Data files: If your chat function depends on data files, make sure to include them in the Docker image.
+
+### Pull Changes from the Template Repository
+
+If you want to pull changes from the template repository to your repository, follow these steps:
+
+1. Add the template repository as a remote:
+
+```bash
+git remote add template https://github.com/lambda-feedback/chat-function-boilerplate.git
+```
+
+2. Fetch changes from all remotes:
+
+```bash
+git fetch --all
+```
+
+3. Merge changes from the template repository:
+
+```bash
+git merge template/main --allow-unrelated-histories
+```
+
+> [!WARNING]
+> Make sure to resolve any conflicts and keep the changes you want to keep.
