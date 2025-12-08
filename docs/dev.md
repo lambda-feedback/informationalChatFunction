@@ -12,7 +12,15 @@
 
 ## Testing the Chat Function
 
-To test your function, you can either call the code directly through a python script. Or you can build the respective chat function docker container locally and call it through an API request. Below you can find details on those processes.
+To test your function, you can run the unit tests, call the code directly through a python script, or build the respective chat function docker container locally and call it through an API request. Below you can find details on those processes.
+
+### Run Unit Tests
+
+You can run the unit tests using `pytest`.
+
+```bash
+pytest
+```
 
 ### Run the Chat Script
 
@@ -22,9 +30,9 @@ You can run the Python function itself. Make sure to have a main function in eit
 python src/module.py
 ```
 
-You can also use the `testbench_agents.py` script to test the agents with example inputs from Lambda Feedback questions and synthetic conversations.
+You can also use the `manual_agent_run.py` script to test the agents with example inputs from Lambda Feedback questions and synthetic conversations.
 ```bash
-python src/agents/utils/testbench_agents.py
+python tests/manual_agent_run.py
 ```
 
 ### Calling the Docker Image Locally
@@ -62,7 +70,7 @@ curl --location 'http://localhost:8080/2015-03-31/functions/function/invocations
 #### Call Docker Container
 ##### A. Call Docker with Python Requests
 
-In the `src/agents/utils` folder you can find the `requests_testscript.py` script that calls the POST URL of the running docker container. It reads any kind of input files with the expected schema. You can use this to test your curl calls of the chatbot.
+In the `tests/` folder you can find the `manual_agent_requests.py` script that calls the POST URL of the running docker container. It reads any kind of input files with the expected schema. You can use this to test your curl calls of the chatbot.
 
 ##### B. Call Docker Container through API request
 
@@ -89,7 +97,6 @@ Body with optional Params:
         "conversational_style":" ",
         "question_response_details": "",
         "include_test_data": true,
-        "agent_type": {agent_name}
     }
 }
 ```

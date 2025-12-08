@@ -1,9 +1,7 @@
 import unittest
-
-try:
-    from .module import Params, chat_module
-except ImportError:
-    from module import Params, chat_module
+from lf_toolkit.chat.result import ChatResult as Result
+from lf_toolkit.chat.params import ChatParams as Params
+from src.module import chat_module
 
 class TestChatModuleFunction(unittest.TestCase):
     """
@@ -27,7 +25,7 @@ class TestChatModuleFunction(unittest.TestCase):
     def test_missing_parameters(self):
         # Checking state for missing parameters on default agent
         response = "Hello, World"
-        expected_params = Params(include_test_data=True, conversation_history=[{ "type": "user", "content": response }], \
+        expected_params = Params(include_test_data=True, conversation_history=['{ "type": "user", "content": response }'], \
                                     summary="", conversational_style="", \
                                     question_response_details={}, conversation_id="1234Test")
 
@@ -69,7 +67,7 @@ class TestChatModuleFunction(unittest.TestCase):
     def test_agent_output(self):
         # Checking the output of the agent
         response = "Hello, World"
-        params = Params(conversation_id="1234Test", conversation_history=[{ "type": "user", "content": response }])
+        params = Params(conversation_id="1234Test", conversation_history=['{ "type": "user", "content": response }'])
 
         result = chat_module(response, params)
 
@@ -78,7 +76,7 @@ class TestChatModuleFunction(unittest.TestCase):
     def test_processing_time_calc(self):
         # Checking the processing time calculation
         response = "Hello, World"
-        params = Params(include_test_data=True, conversation_id="1234Test", conversation_history=[{ "type": "user", "content": response }])
+        params = Params(include_test_data=True, conversation_id="1234Test", conversation_history=['{ "type": "user", "content": response }'])
 
         result = chat_module(response, params)
 

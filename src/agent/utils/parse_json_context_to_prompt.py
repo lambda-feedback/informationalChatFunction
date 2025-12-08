@@ -3,7 +3,7 @@ Refactored JSON to prompt parser using improved, clearer structure.
 """
 
 from typing import List, Optional, Dict, Any, Union
-from .prompt_context_templates import PromptFormatter
+from src.agent.utils.prompt_context_templates import PromptFormatter
 
 # Definitions questionSubmissionSummary type
 class StudentLatestSubmission:
@@ -150,7 +150,7 @@ def parse_json_to_structured_prompt(
     question_submission_summary: Optional[List[StudentWorkResponseArea]],
     question_information: Optional[QuestionDetails],
     question_access_information: Optional[QuestionAccessInformation]
-) -> Optional[str]:
+) -> str:
     """
     Parse JSON data into a well-structured, LLM-friendly prompt.
     
@@ -322,7 +322,7 @@ def parse_json_to_prompt(
     questionSubmissionSummary: Optional[List[StudentWorkResponseArea]],
     questionInformation: Optional[QuestionDetails],
     questionAccessInformation: Optional[QuestionAccessInformation]
-) -> Optional[str]:
+) -> str:
     """
     Legacy wrapper for backward compatibility.
     Recommended to use parse_json_to_structured_prompt for new code.

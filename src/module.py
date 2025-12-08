@@ -3,14 +3,9 @@ from typing import Any
 from lf_toolkit.chat.result import ChatResult as Result
 from lf_toolkit.chat.params import ChatParams as Params
 
-try:
-    from .agents.utils.parse_json_context_to_prompt import parse_json_to_prompt
-    from .agents.base_agent.base_agent import invoke_base_agent
-    from .agents.utils.types import JsonType
-except ImportError:
-    from src.agents.utils.parse_json_context_to_prompt import parse_json_to_prompt
-    from src.agents.base_agent.base_agent import invoke_base_agent
-    from src.agents.utils.types import JsonType
+from src.agent.utils.parse_json_context_to_prompt import parse_json_to_prompt
+from src.agent.agent import invoke_base_agent
+from src.agent.utils.types import JsonType
 
 def chat_module(message: Any, params: Params) -> JsonType:
     """
@@ -36,40 +31,39 @@ def chat_module(message: Any, params: Params) -> JsonType:
     """
 
     result = Result()
-    include_test_data = False
-    conversation_history = []
-    summary = ""
-    conversationalStyle = ""
-    question_response_details_prompt = ""
 
-    if "include_test_data" in params:
-        include_test_data = params["include_test_data"]
-    if "conversation_history" in params:
-        conversation_history = params["conversation_history"]
-    if "summary" in params:
-        summary = params["summary"]
-    if "conversational_style" in params:
-        conversationalStyle = params["conversational_style"]
-    if "question_response_details" in params:
-        question_response_details = params["question_response_details"]
-        question_submission_summary = question_response_details["questionSubmissionSummary"] if "questionSubmissionSummary" in question_response_details else []
-        question_information = question_response_details["questionInformation"] if "questionInformation" in question_response_details else {}
-        question_access_information = question_response_details["questionAccessInformation"] if "questionAccessInformation" in question_response_details else {}
-        try:
-            question_response_details_prompt = parse_json_to_prompt(
-                question_submission_summary,
-                question_information,
-                question_access_information
-            )
-            print("INFO:: ", question_response_details_prompt)
-        except Exception as e:
-            print("ERROR:: ", e)
-            raise Exception("Internal Error: The question response details could not be parsed.")
-    if "conversation_id" in params:
-        conversation_id = params["conversation_id"]
-    else:
+    # EXTRACT PARAMETERS
+    conversation_id = params.get("conversation_id", None)
+    if conversation_id is None:
         raise Exception("Internal Error: The conversation id is required in the parameters of the chat module.")
+
+    include_test_data = params.get("include_test_data", False) or False
+    conversation_history = params.get("conversation_history", []) or []
+    summary = params.get("summary", "") or ""
+    conversationalStyle = params.get("conversational_style", "") or ""
+
+    question_response_details = params.get("question_response_details", {})
+    if isinstance(question_response_details, dict):
+        question_submission_summary = question_response_details.get("questionSubmissionSummary", [])
+        question_information = question_response_details.get("questionInformation", {})
+        question_access_information = question_response_details.get("questionAccessInformation", {})
+    else:
+        print("ERROR:: question_response_details is not a dict")
+        raise Exception("Internal Error: The question response details parameter is malformed.")
     
+    # PARSE QUESTION RESPONSE DETAILS TO PROMPT
+    try:
+        question_response_details_prompt = parse_json_to_prompt(
+            question_submission_summary,
+            question_information,
+            question_access_information
+        )
+    except Exception as e:
+        print("ERROR:: ", e)
+        raise Exception("Internal Error: The question response details could not be parsed.")
+    
+
+    # RUN THE AGENT AND MEASURE PROCESSING TIME
     start_time = time.time()
 
     chatbot_response = invoke_base_agent(query=message, \

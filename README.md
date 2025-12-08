@@ -43,11 +43,11 @@ In GitHub, choose Use this template > Create a new repository in the repository 
 
 Choose the owner, and pick a name for the new repository.
 
-> [!IMPORTANT] If you want to deploy the evaluation function to Lambda Feedback, make sure to choose the Lambda Feedback organization as the owner.
+> [!IMPORTANT] If you want to deploy the chat function to Lambda Feedback, make sure to choose the `Lambda Feedback` organization as the owner.
 
-Set the visibility to Public or Private.
+Set the visibility to `Public` or `Private`.
 
-> [!IMPORTANT] If you want to use GitHub deployment protection rules, make sure to set the visibility to Public.
+> [!IMPORTANT] If you want to use GitHub deployment protection rules, make sure to set the visibility to `Public`.
 
 Click on Create repository.
 
@@ -78,9 +78,9 @@ Also, don't forget to update or delete the Quickstart chapter from the `README.m
 
 ## Development
 
-You can create your own invocation to your own agents hosted anywhere. Copy or update the `base_agent` from `src/agents/` and edit it to match your LLM agent requirements. Import the new invocation in the `module.py` file.
+You can create your own invocation to your own agents hosted anywhere. Copy or update the `agent.py` from `src/agent/` and edit it to match your LLM agent requirements. Import the new invocation in the `module.py` file.
 
-You agent can be based on an LLM hosted anywhere, you have available currently OpenAI, AzureOpenAI, and Ollama models but you can introduce your own API call in the `src/agents/llm_factory.py`.
+You agent can be based on an LLM hosted anywhere, you have available currently OpenAI, AzureOpenAI, and Ollama models but you can introduce your own API call in the `src/agent/utils/llm_factory.py`.
 
 ### Prerequisites
 
@@ -90,23 +90,37 @@ You agent can be based on an LLM hosted anywhere, you have available currently O
 ### Repository Structure
 
 ```bash
-.github/workflows/
-    dev.yml                           # deploys the DEV function to Lambda Feedback
-    main.yml                          # deploys the STAGING function to Lambda Feedback
-    test-report.yml                   # gathers Pytest Report of function tests
-
-docs/               # docs for devs and users
-
-src/module.py       # chat_module function implementation
-src/module_test.py  # chat_module function tests
-src/agents/         # find all agents developed for the chat functionality
-src/agents/utils/test_prompts.py      # allows testing of any LLM agent on a couple of example inputs containing Lambda Feedback Questions and synthetic student conversations
+.
+├── .github/workflows/
+│   ├── dev.yml                           # deploys the DEV function to Lambda Feedback
+│   ├── main.yml                          # deploys the STAGING and PROD functions to Lambda Feedback
+│   └── test-report.yml                   # gathers Pytest Report of function tests
+├── docs/                                 # docs for devs and users
+├── src/
+│   ├── agent/
+│   │   ├── utils/                        # utils for the agent, including the llm_factory
+│   │   ├── agent.py                      # the agent logic
+│   │   └── prompts.py                    # the system prompts defining the behaviour of the chatbot
+│   └── module.py                         
+└── tests/                                # contains all tests for the chat function
+    ├── manual_agent_requests.py          # allows testing of the docker container through API requests
+    ├── manual_agent_run.py               # allows testing of any LLM agent on a couple of example inputs
+    ├── test_index.py                     # pytests
+    └── test_module.py                    # pytests
 ```
 
 
 ## Testing the Chat Function
 
-To test your function, you can either call the code directly through a python script. Or you can build the respective chat function docker container locally and call it through an API request. Below you can find details on those processes.
+To test your function, you can run the unit tests, call the code directly through a python script, or build the respective chat function docker container locally and call it through an API request. Below you can find details on those processes.
+
+### Run Unit Tests
+
+You can run the unit tests using `pytest`.
+
+```bash
+pytest
+```
 
 ### Run the Chat Script
 
@@ -116,9 +130,9 @@ You can run the Python function itself. Make sure to have a main function in eit
 python src/module.py
 ```
 
-You can also use the `testbench_agents.py` script to test the agents with example inputs from Lambda Feedback questions and synthetic conversations.
+You can also use the `manual_agent_run.py` script to test the agents with example inputs from Lambda Feedback questions and synthetic conversations.
 ```bash
-python src/agents/utils/testbench_agents.py
+python tests/manual_agent_run.py
 ```
 
 ### Calling the Docker Image Locally
@@ -156,7 +170,7 @@ curl --location 'http://localhost:8080/2015-03-31/functions/function/invocations
 #### Call Docker Container
 ##### A. Call Docker with Python Requests
 
-In the `src/agents/utils` folder you can find the `requests_testscript.py` script that calls the POST URL of the running docker container. It reads any kind of input files with the expected schema. You can use this to test your curl calls of the chatbot.
+In the `tests/` folder you can find the `manual_agent_requests.py` script that calls the POST URL of the running docker container. It reads any kind of input files with the expected schema. You can use this to test your curl calls of the chatbot.
 
 ##### B. Call Docker Container through API request
 
@@ -183,7 +197,6 @@ Body with optional Params:
         "conversational_style":" ",
         "question_response_details": "",
         "include_test_data": true,
-        "agent_type": {agent_name}
     }
 }
 ```

@@ -1,13 +1,7 @@
-try:
-    from ..llm_factory import OpenAILLMs, GoogleAILLMs
-    from .base_prompts import \
-        role_prompt, conv_pref_prompt, update_conv_pref_prompt, summary_prompt, update_summary_prompt, summary_system_prompt
-    from ..utils.types import InvokeAgentResponseType
-except ImportError:
-    from src.agents.llm_factory import OpenAILLMs, GoogleAILLMs
-    from src.agents.base_agent.base_prompts import \
-        role_prompt, conv_pref_prompt, update_conv_pref_prompt, summary_prompt, update_summary_prompt, summary_system_prompt
-    from src.agents.utils.types import InvokeAgentResponseType
+from src.agent.utils.llm_factory import OpenAILLMs, GoogleAILLMs
+from src.agent.prompts import \
+    role_prompt, conv_pref_prompt, update_conv_pref_prompt, summary_prompt, update_summary_prompt, summary_system_prompt
+from src.agent.utils.types import InvokeAgentResponseType
 
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import SystemMessage, RemoveMessage, HumanMessage, AIMessage
@@ -62,7 +56,7 @@ class BaseAgent:
         system_message = self.role_prompt
 
         # Adding external student progress and question context details from data queries
-        question_response_details = config["configurable"].get("question_response_details", "")
+        question_response_details = config.get("configurable", {}).get("question_response_details", "")
         if question_response_details:
             system_message += f"## Known Question Materials: {question_response_details} \n\n"
 
@@ -98,8 +92,8 @@ class BaseAgent:
         """Summarize the conversation."""
 
         summary = state.get("summary", "")
-        previous_summary = config["configurable"].get("summary", "")
-        previous_conversationalStyle = config["configurable"].get("conversational_style", "")
+        previous_summary = config.get("configurable", {}).get("summary", "")
+        previous_conversationalStyle = config.get("configurable", {}).get("conversational_style", "")
         if previous_summary:
             summary = previous_summary
         

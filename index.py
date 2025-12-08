@@ -1,10 +1,6 @@
 import json
-try:
-    from .src.module import chat_module
-    from .src.agents.utils.types import JsonType
-except ImportError:
-    from src.module import chat_module
-    from src.agents.utils.types import JsonType
+from src.module import chat_module
+from src.agent.utils.types import JsonType
 
 def handler(event: JsonType, context):
     """
