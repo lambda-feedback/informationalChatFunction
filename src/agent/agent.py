@@ -1,7 +1,6 @@
-from src.agent.utils.llm_factory import OpenAILLMs, GoogleAILLMs
+from src.agent.llm_factory import OpenAILLMs, GoogleAILLMs
 from src.agent.prompts import \
     role_prompt, conv_pref_prompt, update_conv_pref_prompt, summary_prompt, update_summary_prompt, summary_system_prompt
-from src.agent.utils.types import InvokeAgentResponseType
 
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import SystemMessage, RemoveMessage, HumanMessage, AIMessage
@@ -11,12 +10,12 @@ from typing import Annotated, TypeAlias
 from typing_extensions import TypedDict
 
 """
-Base agent for development [LLM workflow with a summarisation, profiling, and chat agent that receives an external conversation history].
+Base agent: LLM chat with automatic conversation summarisation and style analysis.
 
-This agent is designed to:
-- [summarise_prompt]        summarise the conversation after 'max_messages_to_summarize' number of messages is reached in the conversation
-- [conv_pref_prompt]        analyse the conversation style of the student 
-- [role_prompt]             role of a tutor to answer student's questions on the topic  
+Nodes:
+- call_llm:               responds to the student using role_prompt + optional question context + conversation summary
+- summarize_conversation: triggered after max_messages_to_summarize messages; compresses history and
+                          analyses the student's conversational style (returned in output metadata only)
 """
 
 ValidMessageTypes: TypeAlias = SystemMessage | HumanMessage | AIMessage
@@ -29,14 +28,11 @@ class State(TypedDict):
 
 class BaseAgent:
     def __init__(self):
-        llm = OpenAILLMs()                  # OpenAILLMs() or GoogleAILLMs()
-        self.llm = llm.get_llm()
-        summarisation_llm = OpenAILLMs()    # OpenAILLMs() or GoogleAILLMs()
-        self.summarisation_llm = summarisation_llm.get_llm()
-        self.summary = ""
-        self.conversationalStyle = ""
+        # Main chat LLM — change to GoogleAILLMs(), AzureLLMs(), or OllamaLLMs() if preferred
+        self.llm = OpenAILLMs().get_llm()
+        # Summarisation LLM — can be set to a different/cheaper model than the chat LLM
+        self.summarisation_llm = OpenAILLMs().get_llm()
 
-        # Define Agent's specific Parameters
         self.max_messages_to_summarize = 11
         self.role_prompt = role_prompt
         self.summary_prompt = summary_prompt
@@ -44,23 +40,22 @@ class BaseAgent:
         self.conversation_preference_prompt = conv_pref_prompt
         self.update_conversation_preference_prompt = update_conv_pref_prompt
 
-        # Define a new graph for the conversation & compile it
-        self.workflow = StateGraph(State)
-        self.workflow_definition()
-        self.app = self.workflow.compile()
+        workflow = StateGraph(State)
+        workflow.add_node("call_llm", self.call_model)
+        workflow.add_node("summarize_conversation", self.summarize_conversation)
+        workflow.add_conditional_edges(source=START, path=self.should_summarize)
+        workflow.add_edge("summarize_conversation", "call_llm")
+        workflow.add_edge("call_llm", END)
+        self.app = workflow.compile()
 
-    def call_model(self, state: State, config: RunnableConfig) -> str:
-        """Call the LLM model knowing the role system prompt, the summary and the conversational style."""
-        
-        # Default AI tutor role prompt
+    def call_model(self, state: State, config: RunnableConfig) -> dict:
+        """Invoke the chat LLM with role prompt, optional question context, and conversation summary."""
         system_message = self.role_prompt
 
-        # Adding external student progress and question context details from data queries
-        question_response_details = config.get("configurable", {}).get("question_response_details", "")
-        if question_response_details:
-            system_message += f"## Known Question Materials: {question_response_details} \n\n"
+        context_prompt = config.get("configurable", {}).get("context_prompt", "")
+        if context_prompt:
+            system_message += f"## Known Question Materials: {context_prompt} \n\n"
 
-        # Adding summary and conversational style to the system message
         summary = state.get("summary", "")
         conversationalStyle = state.get("conversationalStyle", "")
         if summary:
@@ -68,130 +63,56 @@ class BaseAgent:
         if conversationalStyle:
             system_message += f"## Known conversational style and preferences of the student for this conversation: {conversationalStyle}. \n\nYour answer must be in line with this conversational style."
 
-        messages = [SystemMessage(content=system_message)] + state['messages']
+        messages = [SystemMessage(content=system_message)] + state["messages"]
+        response = self.llm.invoke(self._valid(messages))
+        return {"messages": [response]}
 
-        valid_messages = self.check_for_valid_messages(messages)
-        response = self.llm.invoke(valid_messages)
-
-        # Save summary for fetching outside the class
-        self.summary = summary
-        self.conversationalStyle = conversationalStyle
-
-        return {"summary": summary, "messages": [response]}
-    
-    def check_for_valid_messages(self, messages: list[AllMessageTypes]) -> list[ValidMessageTypes]:
-        """ Removing the RemoveMessage() from the list of messages """
-
-        valid_messages: list[ValidMessageTypes] = []
-        for message in messages:
-            if message.type != 'remove':
-                valid_messages.append(message)
-        return valid_messages
-    
-    def summarize_conversation(self, state: State, config: RunnableConfig) -> dict:
-        """Summarize the conversation."""
-
+    def summarize_conversation(self, state: State) -> dict:
+        """Summarise history and analyse conversational style when message count exceeds the threshold."""
         summary = state.get("summary", "")
-        previous_summary = config.get("configurable", {}).get("summary", "")
-        previous_conversationalStyle = config.get("configurable", {}).get("conversational_style", "")
-        if previous_summary:
-            summary = previous_summary
-        
-        if summary:
-            summary_message = (
-                f"This is summary of the conversation to date: {summary}\n\n" +
-                self.update_summary_prompt
-            )
-        else:
-            summary_message = self.summary_prompt
-        
-        if previous_conversationalStyle:
-            conversationalStyle_message = (
-                f"This is the previous conversational style of the student for this conversation: {previous_conversationalStyle}\n\n" +
-                self.update_conversation_preference_prompt
-            )
-        else:
-            conversationalStyle_message = self.conversation_preference_prompt
+        conversationalStyle = state.get("conversationalStyle", "")
 
-        # STEP 1: Summarize the conversation
-        messages = state["messages"][:-1] + [HumanMessage(content=summary_message)] 
-        valid_messages = self.check_for_valid_messages(messages)
-        summary_response = self.summarisation_llm.invoke(valid_messages)
+        summary_message = (
+            f"This is summary of the conversation to date: {summary}\n\n" + self.update_summary_prompt
+        ) if summary else self.summary_prompt
 
-        # STEP 2: Analyze the conversational style
-        messages = state["messages"][:-1] + [HumanMessage(content=conversationalStyle_message)]
-        valid_messages = self.check_for_valid_messages(messages)
-        conversationalStyle_response = self.summarisation_llm.invoke(valid_messages)
+        style_message = (
+            f"This is the previous conversational style of the student for this conversation: {conversationalStyle}\n\n" + self.update_conversation_preference_prompt
+        ) if conversationalStyle else self.conversation_preference_prompt
 
-        # Delete messages that are no longer wanted, except the last ones
+        summary_response = self.summarisation_llm.invoke(self._valid(state["messages"][:-1] + [HumanMessage(content=summary_message)]))
+        conversational_style_response = self.summarisation_llm.invoke(self._valid(state["messages"][:-1] + [HumanMessage(content=style_message)]))
+
         delete_messages: list[AllMessageTypes] = [RemoveMessage(id=m.id) for m in state["messages"][:-3]]
+        return {"summary": summary_response.content, "conversationalStyle": conversational_style_response.content, "messages": delete_messages}
 
-        return {"summary": summary_response.content, "conversationalStyle": conversationalStyle_response.content, "messages": delete_messages}
-    
     def should_summarize(self, state: State) -> str:
-        """
-        Return the next node to execute. 
-        If there are more than X messages, then we summarize the conversation.
-        Otherwise, we call the LLM.
-        """
+        valid = self._valid(state["messages"])
+        if not valid:
+            raise Exception("Internal Error: No valid messages found in the conversation history.")
+        nr_messages = len(valid) - (1 if "system" in valid[-1].type else 0)
+        return "summarize_conversation" if nr_messages > self.max_messages_to_summarize else "call_llm"
 
-        messages = state["messages"]
-        valid_messages = self.check_for_valid_messages(messages)
-        nr_messages = len(valid_messages)
-        if len(valid_messages) == 0:
-            raise Exception("Internal Error: No valid messages found in the conversation history. Conversation history might be empty.")
-        if "system" in valid_messages[-1].type:
-            nr_messages -= 1
+    def _valid(self, messages: list[AllMessageTypes]) -> list[ValidMessageTypes]:
+        return [m for m in messages if m.type != "remove"]
 
-        # always pairs of (sent, response) + 1 latest message
-        if nr_messages > self.max_messages_to_summarize:
-            return "summarize_conversation"
-        return "call_llm"    
 
-    def workflow_definition(self) -> None:
-        self.workflow.add_node("call_llm", self.call_model)
-        self.workflow.add_node("summarize_conversation", self.summarize_conversation)
-
-        self.workflow.add_conditional_edges(source=START, path=self.should_summarize)
-        self.workflow.add_edge("summarize_conversation", "call_llm")
-        self.workflow.add_edge("call_llm", END)
-
-    def get_summary(self) -> str:
-        return self.summary
-    
-    def get_conversational_style(self) -> str:
-        return self.conversationalStyle
-
-    def print_update(self, update: dict) -> None:
-        for k, v in update.items():
-            for m in v["messages"]:
-                m.pretty_print()
-            if "summary" in v:
-                print(v["summary"])
-
-    def pretty_response_value(self, event: dict) -> str:
-        return event["messages"][-1].content
-    
 agent = BaseAgent()
-def invoke_base_agent(query: str, conversation_history: list, summary: str, conversationalStyle: str, question_response_details: str, session_id: str) -> InvokeAgentResponseType:
+
+def invoke_base_agent(messages: list, summary: str, conversationalStyle: str, context_prompt: str, session_id: str | None = None) -> dict:
     """
-    Call an agent that has no conversation memory and expects to receive all past messages in the params and the latest human request in the query.
-    If conversation history longer than X, the agent will summarize the conversation and will provide a conversational style analysis.
+    Invoke the agent with the full conversation history and return the chatbot reply plus updated metadata.
+    Summarisation and style analysis trigger automatically once message count exceeds max_messages_to_summarize.
     """
-    print(f'in invoke_base_agent(), thread_id = {session_id}')
-
-    config = {"configurable": {"thread_id": session_id, "summary": summary, "conversational_style": conversationalStyle, "question_response_details": question_response_details}}
-    response_events = agent.app.invoke({"messages": conversation_history, "summary": summary, "conversational_style": conversationalStyle}, config=config, stream_mode="values") #updates
-    pretty_printed_response = agent.pretty_response_value(response_events) # get last event/ai answer in the response
-
-    # Gather Metadata from the agent
-    summary = agent.get_summary()
-    conversationalStyle = agent.get_conversational_style()
-
-    print(f'in invoke_base_agent(), response generated by chatbot')
-
+    print(f"in invoke_base_agent(), thread_id = {session_id}")
+    config: RunnableConfig = {"configurable": {"context_prompt": context_prompt}}
+    state = agent.app.invoke(
+        State(messages=messages, summary=summary, conversationalStyle=conversationalStyle),
+        config=config,
+    )
+    print("in invoke_base_agent(), response generated by chatbot")
     return {
-        "input": query,
-        "output": pretty_printed_response,
-        "intermediate_steps": [str(summary), conversationalStyle, conversation_history]
+        "output": state["messages"][-1].content,
+        "summary": state.get("summary", ""),
+        "conversationalStyle": state.get("conversationalStyle", ""),
     }

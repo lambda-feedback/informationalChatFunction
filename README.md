@@ -80,7 +80,9 @@ Also, don't forget to update or delete the Quickstart chapter from the `README.m
 
 You can create your own invocation to your own agents hosted anywhere. Copy or update the `agent.py` from `src/agent/` and edit it to match your LLM agent requirements. Import the new invocation in the `module.py` file.
 
-You agent can be based on an LLM hosted anywhere, you have available currently OpenAI, AzureOpenAI, and Ollama models but you can introduce your own API call in the `src/agent/utils/llm_factory.py`.
+Your agent can be based on an LLM hosted anywhere. OpenAI, Google AI, Azure OpenAI, and Ollama are available out of the box via `src/agent/llm_factory.py`, and you can add your own provider there too.
+
+The agent uses **two separate LLM instances** — `self.llm` for chat responses and `self.summarisation_llm` for conversation summarisation and style analysis. By default both use the same provider, but you can point them at different models (e.g. a cheaper or faster model for summarisation) by changing the class in `agent.py`.
 
 ### Prerequisites
 
@@ -98,13 +100,17 @@ You agent can be based on an LLM hosted anywhere, you have available currently O
 ├── docs/                                 # docs for devs and users
 ├── src/
 │   ├── agent/
-│   │   ├── utils/                        # utils for the agent, including the llm_factory
-│   │   ├── agent.py                      # the agent logic
-│   │   └── prompts.py                    # the system prompts defining the behaviour of the chatbot
-│   └── module.py                         
+│   │   ├── agent.py                      # LangGraph stateful agent logic
+│   │   ├── context.py                    # converts muEd context dicts to LLM prompt text
+│   │   ├── llm_factory.py                # factory classes for each LLM provider
+│   │   └── prompts.py                    # system prompts defining the behaviour of the chatbot
+│   └── module.py
 └── tests/                                # contains all tests for the chat function
+    ├── example_inputs/                   # muEd example payloads for end-to-end tests
     ├── manual_agent_requests.py          # allows testing of the docker container through API requests
     ├── manual_agent_run.py               # allows testing of any LLM agent on a couple of example inputs
+    ├── utils.py                          # shared test helpers
+    ├── test_example_inputs.py            # pytests for the example input files
     ├── test_index.py                     # pytests
     └── test_module.py                    # pytests
 ```
@@ -164,7 +170,7 @@ This will start the chat function and expose it on port `8080` and it will be op
 ```bash
 curl --location 'http://localhost:8080/2015-03-31/functions/function/invocations' \
 --header 'Content-Type: application/json' \
---data '{"body":"{\"message\": \"hi\", \"params\": {\"conversation_id\": \"12345Test\", \"conversation_history\": [{\"type\": \"user\", 
+--data '{"body":"{\"conversationId\": \"12345Test\", \"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}], \"user\": {\"type\": \"LEARNER\"}}"}'
 ```
 
 #### Call Docker Container
@@ -183,21 +189,98 @@ http://localhost:8080/2015-03-31/functions/function/invocations
 Body (stringified within body for API request):
 
 ```JSON
-{"body":"{\"message\": \"hi\", \"params\": {\"conversation_id\": \"12345Test\", \"conversation_history\": [{\"type\": \"user\", \"content\": \"hi\"}]}}"}
+{"body":"{\"conversationId\": \"12345Test\", \"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}], \"user\": {\"type\": \"LEARNER\"}}"}
 ```
 
-Body with optional Params:
-```JSON
+Body with optional fields:
+```json
 {
-    "message":"hi",
-    "params":{
-        "conversation_id":"12345Test",
-        "conversation_history":[{"type":"user","content":"hi"}],
-        "summary":" ",
-        "conversational_style":" ",
-        "question_response_details": "",
-        "include_test_data": true,
+  "conversationId": "<uuid>",
+  "messages": [
+    { "role": "USER", "content": "<previous user message>" },
+    { "role": "ASSISTANT", "content": "<previous assistant reply>" },
+    { "role": "USER", "content": "<current message>" }
+  ],
+  "user": {
+    "type": "LEARNER",
+    "preference": {
+      "conversationalStyle": "<stored style string>"
+    },
+    "taskProgress": {
+      "timeSpentOnQuestion": "30 minutes",
+      "accessStatus": "a good amount of time spent on this question today.",
+      "markedDone": "This question is still being worked on.",
+      "currentPart": {
+        "position": 0,
+        "timeSpentOnPart": "10 minutes",
+        "markedDone": "This part is not marked done.",
+        "responseAreas": [
+          {
+            "responseType": "EXPRESSION",
+            "totalSubmissions": 3,
+            "wrongSubmissions": 2,
+            "latestSubmission": {
+              "submission": "<student's last answer>",
+              "feedback": "<feedback text from evaluator>",
+              "answer": "<reference answer used for evaluation>"
+            }
+          }
+        ]
+      }
     }
+  },
+  "context": {
+    "summary": "<compressed conversation history>",
+    "set": {
+      "title": "Fundamentals",
+      "number": 2,
+      "description": "<set description>"
+    },
+    "question": {
+      "title": "Understanding Polymorphism",
+      "number": 3,
+      "guidance": "<teacher guidance>",
+      "content": "<master question content>",
+      "estimatedTime": "15-25 minutes",
+      "parts": [
+        {
+          "position": 0,
+          "content": "<part prompt>",
+          "answerContent": "<part answer>",
+          "workedSolutionSections": [
+            { "position": 0, "title": "Step 1", "content": "..." }
+          ],
+          "structuredTutorialSections": [
+            { "position": 0, "title": "Hint", "content": "..." }
+          ],
+          "responseAreas": [
+            {
+              "position": 0,
+              "responseType": "EXPRESSION",
+              "answer": "<reference answer>",
+              "preResponseText": "<label shown before input>"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
+Response:
+
+```json
+{
+  "output": {
+    "role": "ASSISTANT",
+    "content": "<assistant reply text>"
+  },
+  "metadata": {
+    "summary": "<updated conversation summary>",
+    "conversationalStyle": "<updated style string>",
+    "processingTimeMs": 1234
+  }
 }
 ```
 

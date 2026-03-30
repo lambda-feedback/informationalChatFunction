@@ -1,52 +1,36 @@
 import json
-from src.module import chat_module
-from src.agent.utils.types import JsonType
+from pydantic import ValidationError
 
-def handler(event: JsonType, context):
+from lf_toolkit.chat import ChatRequest
+from src.module import chat_module
+
+
+def handler(event, context):
     """
     Lambda handler function
     """
-    # Log the input event for debugging purposes
-    # print("Received event:", " ".join(json.dumps(event, indent=2).splitlines()))
-
     if "body" in event:
         try:
             event = json.loads(event["body"])
         except json.JSONDecodeError:
             return {
                 "statusCode": 400,
-                "body": "Invalid JSON format in the body or body not found. Please check the input."
+                "body": "Invalid JSON format in the body. Please check the input.",
             }
 
-    if "message" not in event:
-        return {
-            "statusCode": 400,
-            "body": "Missing 'message' key in event. Please confirm the key in the json body."
-        }
-    if "params" not in event:
-        return {
-            "statusCode": 400,
-            "body": "Missing 'params' key in event. Please confirm the key in the json body. Make sure it contains the necessary conversation_id."
-        }
-    
-    message = event.get("message")
-    params = event.get("params")
+    try:
+        request = ChatRequest.model_validate(event)
+    except ValidationError as e:
+        return {"statusCode": 400, "body": e.json()}
 
     try:
-        chatbot_response = chat_module(message, params)
+        result = chat_module(request)
     except Exception as e:
         return {
             "statusCode": 500,
-            "body": f"An error occurred within the chat_module(): {str(e)}"
+            "body": f"An error occurred within the chat_module(): {str(e)}",
         }
 
-    # Create a response
-    response = {
-        "statusCode": 200,
-        "body": json.dumps(chatbot_response)
-    }
-
-    # Log the response for debugging purposes
+    response = {"statusCode": 200, "body": result.model_dump_json()}
     print("Returning response:", " ".join(json.dumps(response, indent=2).splitlines()))
-
     return response
