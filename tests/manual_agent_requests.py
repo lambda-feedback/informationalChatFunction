@@ -9,7 +9,7 @@ Script that sends a request to the local endpoint of the docker container to tes
 url = "http://localhost:8080/2015-03-31/functions/function/invocations"
 
 # File path for the input text
-path = "src/agent/utils/example_inputs/"
+path = "tests/example_inputs/"
 input_file = path + "example_input_1.json"
 
 # Step 1: Read the input file
