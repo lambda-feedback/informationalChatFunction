@@ -10,47 +10,23 @@ Helping approach: encourages self-discovery of the answer, but will reveal the s
 </code>
 </pre>
 
-## Inputs
-Body:
-```JSON
-{
-    "message":"hi",
-    "params":{
-        "conversation_id":"12345Test",
-        "conversation_history":[{"type":"user","content":"hi"}],
-        "include_test_data": true,
-    }
-}
-```
-
-## Outputs
-```JSON
-{
-    "chatbotResponse":"hi back",
-    "metadata": {
-        "summary": "",
-        "conversational_style": "",
-        "conversation_history": [],
-    },
-    "processing_time": 0
-}
-```
-
 ## Testing the Chat Function
 
-To test your function, you can either call the code directly through a python script. Or you can build the respective chat function docker container locally and call it through an API request. Below you can find details on those processes.
+To test your function, you can run the unit tests, call the code directly through a python script, or build the respective chat function docker container locally and call it through an API request. Below you can find details on those processes.
+
+### Run Unit Tests
+
+You can run the unit tests using `pytest`.
+
+```bash
+pytest
+```
 
 ### Run the Chat Script
 
-You can run the Python function itself. Make sure to have a main function in either `src/module.py` or `index.py`.
-
+You can also use the `manual_agent_run.py` script to test the agents with example inputs from Lambda Feedback questions and synthetic conversations.
 ```bash
-python src/module.py
-```
-
-You can also use the `testbench_agents.py` script to test the agents with example inputs from Lambda Feedback questions and synthetic conversations.
-```bash
-python src/agents/utils/testbench_agents.py
+python tests/manual_agent_run.py
 ```
 
 ### Calling the Docker Image Locally
@@ -82,13 +58,13 @@ This will start the chat function and expose it on port `8080` and it will be op
 ```bash
 curl --location 'http://localhost:8080/2015-03-31/functions/function/invocations' \
 --header 'Content-Type: application/json' \
---data '{"body":"{\"message\": \"hi\", \"params\": {\"conversation_id\": \"12345Test\", \"conversation_history\": [{\"type\": \"user\", 
+--data '{"body":"{\"conversationId\": \"12345Test\", \"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}], \"user\": {\"type\": \"LEARNER\"}}"}'
 ```
 
 #### Call Docker Container
 ##### A. Call Docker with Python Requests
 
-In the `src/agents/utils` folder you can find the `requests_testscript.py` script that calls the POST URL of the running docker container. It reads any kind of input files with the expected schema. You can use this to test your curl calls of the chatbot.
+In the `tests/` folder you can find the `manual_agent_requests.py` script that calls the POST URL of the running docker container. It reads any kind of input files with the expected schema. You can use this to test your curl calls of the chatbot.
 
 ##### B. Call Docker Container through API request
 
@@ -101,22 +77,97 @@ http://localhost:8080/2015-03-31/functions/function/invocations
 Body (stringified within body for API request):
 
 ```JSON
-{"body":"{\"message\": \"hi\", \"params\": {\"conversation_id\": \"12345Test\", \"conversation_history\": [{\"type\": \"user\", \"content\": \"hi\"}]}}"}
+{"body":"{\"conversationId\": \"12345Test\", \"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}], \"user\": {\"type\": \"LEARNER\"}}"}
 ```
 
-Body with optional Params:
-```JSON
+Input Body with optional fields:
+```json
 {
-    "message":"hi",
-    "params":{
-        "conversation_id":"12345Test",
-        "conversation_history":[{"type":"user","content":"hi"}],
-        "summary":" ",
-        "conversational_style":" ",
-        "question_response_details": "",
-        "include_test_data": true,
-        "agent_type": {agent_name}
+  "conversationId": "<uuid>",
+  "messages": [
+    { "role": "USER", "content": "<previous user message>" },
+    { "role": "ASSISTANT", "content": "<previous assistant reply>" },
+    { "role": "USER", "content": "<current message>" }
+  ],
+  "user": {
+    "type": "LEARNER",
+    "preference": {
+      "conversationalStyle": "<stored style string>"
+    },
+    "taskProgress": {
+      "timeSpentOnQuestion": "30 minutes",
+      "accessStatus": "a good amount of time spent on this question today.",
+      "markedDone": "This question is still being worked on.",
+      "currentPart": {
+        "position": 0,
+        "timeSpentOnPart": "10 minutes",
+        "markedDone": "This part is not marked done.",
+        "responseAreas": [
+          {
+            "responseType": "EXPRESSION",
+            "totalSubmissions": 3,
+            "wrongSubmissions": 2,
+            "latestSubmission": {
+              "submission": "<student's last answer>",
+              "feedback": "<feedback text from evaluator>",
+              "answer": "<reference answer used for evaluation>"
+            }
+          }
+        ]
+      }
     }
+  },
+  "context": {
+    "summary": "<compressed conversation history>",
+    "set": {
+      "title": "Fundamentals",
+      "number": 2,
+      "description": "<set description>"
+    },
+    "question": {
+      "title": "Understanding Polymorphism",
+      "number": 3,
+      "guidance": "<teacher guidance>",
+      "content": "<master question content>",
+      "estimatedTime": "15-25 minutes",
+      "parts": [
+        {
+          "position": 0,
+          "content": "<part prompt>",
+          "answerContent": "<part answer>",
+          "workedSolutionSections": [
+            { "position": 0, "title": "Step 1", "content": "..." }
+          ],
+          "structuredTutorialSections": [
+            { "position": 0, "title": "Hint", "content": "..." }
+          ],
+          "responseAreas": [
+            {
+              "position": 0,
+              "responseType": "EXPRESSION",
+              "answer": "<reference answer>",
+              "preResponseText": "<label shown before input>"
+            }
+          ]
+        }
+      ]
+    }
+  }
 }
 ```
 
+Output Response:
+
+```json
+{
+  "output": {
+    "role": "ASSISTANT",
+    "content": "<assistant reply text>"
+  },
+  "metadata": {
+    "summary": "<updated conversation summary>",
+    "conversationalStyle": "<updated style string>",
+    "processingTimeMs": 1234
+  }
+}
+```

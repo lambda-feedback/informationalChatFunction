@@ -1,0 +1,123 @@
+{
+  "conversationId": "example-conversation-id-1",
+  "messages": [
+    { "role": "USER", "content": "How can I start solving this question?" }
+  ],
+  "user": {
+    "type": "LEARNER",
+    "preference": { "conversationalStyle": "" },
+    "taskProgress": {
+      "timeSpentOnQuestion": "58 minutes",
+      "accessStatus": "too much time spent on this question today.",
+      "markedDone": "This question is still being worked on.",
+      "currentPart": {
+        "position": 0,
+        "timeSpentOnPart": "37 minutes",
+        "markedDone": "This part is not marked done.",
+        "responseAreas": [
+          {
+            "responseType": "NUMBER",
+            "totalSubmissions": 1,
+            "wrongSubmissions": 1,
+            "latestSubmission": {
+              "submission": 1,
+              "feedback": "Incorrect",
+              "answer": "26"
+            }
+          },
+          {
+            "responseType": "NUMBER",
+            "totalSubmissions": 1,
+            "wrongSubmissions": 1,
+            "latestSubmission": {
+              "submission": 20,
+              "feedback": "Incorrect",
+              "answer": "53"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "context": {
+    "summary": "",
+    "set": {
+      "title": "Computing",
+      "number": 8,
+      "description": "Exercises on number systems and binary arithmetic."
+    },
+    "question": {
+      "title": "Binary Numbers",
+      "number": 0,
+      "guidance": "",
+      "content": "",
+      "estimatedTime": "5-10 minutes",
+      "parts": [
+        {
+          "position": 0,
+          "content": "Convert the following numbers to decimal: $11010_2$, $110101_2$.",
+          "answerContent": "$11010_2 = 26_{10}$\\n\\n$110101_2 = 53_{10}$&#x20;\\n\\n&#x20;&#x20;",
+          "workedSolutionSections": [
+            {
+              "position": 0,
+              "title": "",
+              "content": "$11010_2 = (0\\\\times1) + (1\\\\times2) + (0\\\\times4) + (1\\\\times8) + (1\\\\times16) = \\\\boxed{26_{10}}$&#x20;\\n\\n***\\n\\n$110101_2 = (1\\\\times1) + (0\\\\times2) + (1\\\\times4) + (0\\\\times8) + (1\\\\times16) + (1\\\\times32) = \\\\boxed{53_{10}}$&#x20;\\n\\n&#x20;"
+            }
+          ],
+          "structuredTutorialSections": [],
+          "responseAreas": [
+            {
+              "position": 0,
+              "responseType": "NUMBER",
+              "answer": 26,
+              "preResponseText": "$11010_2 =$"
+            },
+            {
+              "position": 1,
+              "responseType": "NUMBER",
+              "answer": 53,
+              "preResponseText": "$110101_2$"
+            }
+          ]
+        },
+        {
+          "position": 1,
+          "content": "Convert the following numbers to binary: $101_{10}$, $16_{10}$.",
+          "answerContent": "$101_{10} = 1100101_2$&#x20;\\n\\n$16_{10} = 10000_2$&#x20;\\n\\n&#x20;&#x20;",
+          "workedSolutionSections": [
+            {
+              "position": 0,
+              "title": "",
+              "content": ""
+            },
+            {
+              "position": 0,
+              "title": "By repeated division",
+              "content": "$101_{10}$ can be divided by 2 to give a quotient of 50 and a remainder of 1. The remainder is the first binary digit: $1_2$.\\n\\n***\\n\\n$50_{10}$ divided by 2 gives a quotient of 25 and a remainder of zero, so the second binary digit is 0: $01_2$.\\n\\n***\\n\\n$25_{10}$ divided by 2 gives a quotient of 12 and a remainder of 1, so the third binary digit is 1: $101_2$\\n\\n***\\n\\n$12_{10}$ divided by 2 gives a quotient of 6 and a remainder of 0, so the fourth binary digit is 0: $0101_2$\\n\\n***\\n\\n$6_{10}$ divided by 2 gives a quotient of 3 and a remainder of 0, so the fifth binary digit is 0: $00101_2$\\n\\n***\\n\\n$3_{10}$ divided by 2 gives a quotient of 1 and a remainder of 1, so the sixth binary digit is 1: $100101_2$\\n\\n***\\n\\n$1_{10}$ divided by 2 gives a quotient of zero and a remainder of 1, so the seventh binary digit is 1: $\\\\boxed{1100101_2}$.&#x20;\\n\\n&#x20;&#x20;"
+            },
+            {
+              "position": 1,
+              "title": "By inspection",
+              "content": "$101_{10}$ can be written in terms of powers of 2 as $101 = 64 + 32 + 4 + 1 = 2^6 + 2^5 + 2^2 + 2^0$, so its binary representation is $\\\\boxed{1100101_2}$.\\n\\n***\\n\\n$16_{10}$ is already a power of 2 ($2^4$), so its binary representation will have 1 bit set: $\\\\boxed{10000_2}$.&#x20;\\n\\n&#x20; &#x20;"
+            }
+          ],
+          "structuredTutorialSections": [],
+          "responseAreas": [
+            {
+              "position": 0,
+              "responseType": "NUMBER",
+              "answer": 1100101,
+              "preResponseText": "$101_{10} = $"
+            },
+            {
+              "position": 1,
+              "responseType": "NUMBER",
+              "answer": 10000,
+              "preResponseText": "$16_{10} = $"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

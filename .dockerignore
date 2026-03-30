@@ -148,10 +148,3 @@ reports/
 
 # Synthetic data conversations
 src/agents/utils/example_inputs/
-src/agents/utils/synthetic_conversations/
-src/agents/utils/synthetic_conversation_generation.py
-src/agents/utils/testbench_prompts.py
-src/agents/utils/langgraph_viz.py
-
-# development agents
-src/agents/student_agent/

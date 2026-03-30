@@ -25,7 +25,7 @@ COPY src ./src
 
 COPY index.py .
 
-COPY index_test.py .
+COPY tests ./tests
 
 # Set the Lambda function handler
 CMD ["index.handler"]
