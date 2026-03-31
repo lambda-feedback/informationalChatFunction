@@ -78,7 +78,7 @@ Also, don't forget to update or delete the Quickstart chapter from the `README.m
 
 ## Development
 
-You can create your own invocation to your own agents hosted anywhere. Copy or update the `agent.py` from `src/agent/` and edit it to match your LLM agent requirements. Import the new invocation in the `module.py` file.
+You can create your own invocation to your own agents hosted anywhere. To modify the behaviour of the chatbot, simply edit the prompts in `src/agent/prompts.py`. Or if you want to create a custom agent, copy or update the `agent.py` from `src/agent/` and edit it to match your LLM agent requirements. Import the new invocation in the `module.py` file.
 
 Your agent can be based on an LLM hosted anywhere. OpenAI, Google AI, Azure OpenAI, and Ollama are available out of the box via `src/agent/llm_factory.py`, and you can add your own provider there too.
 
