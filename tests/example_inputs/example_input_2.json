@@ -1,0 +1,97 @@
+{
+  "conversationId": "example-conversation-id-2",
+  "messages": [{ "role": "USER", "content": "help" }],
+  "user": {
+    "type": "LEARNER",
+    "preference": {
+      "conversationalStyle": "student prefers direct and short responses"
+    },
+    "taskProgress": {
+      "timeSpentOnQuestion": "less than one minute",
+      "accessStatus": "",
+      "markedDone": "This question is still being worked on.",
+      "currentPart": {
+        "position": 0,
+        "timeSpentOnPart": "less than one minute",
+        "markedDone": "This part is marked done.",
+        "responseAreas": [
+          {
+            "responseType": "NUMERIC_UNITS",
+            "totalSubmissions": 3,
+            "wrongSubmissions": 2,
+            "latestSubmission": {
+              "submission": "939.7 J",
+              "feedback": "Correct",
+              "answer": "\"939.7 J\""
+            }
+          }
+        ]
+      }
+    }
+  },
+  "context": {
+    "summary": "noting was discussed yet",
+    "set": { "title": "Physics", "number": 7, "description": "" },
+    "question": {
+      "title": "Work done",
+      "number": 0,
+      "guidance": "See section 1.11.",
+      "content": "**(L3)** A father pulls a child on a sled with a rope that has a constant tension of $F =100\\\\text{N}$ and makes an angle of $20^\\\\circ$ to the horizontal. Calculate the work he performs after pulling the child for $10\\\\text{m}$.&#x20;\\n\\n![](image)\\n",
+      "estimatedTime": "10 minutes",
+      "parts": [
+        {
+          "position": 0,
+          "content": "Calculate the work he performs after pulling the child for $10\\\\text{m}$.&#x20;\\n",
+          "answerContent": "$W = 939.7\\\\text{J}$\\n",
+          "workedSolutionSections": [
+            {
+              "position": 0,
+              "title": "",
+              "content": "We require the force component parallel to the direction of travel, and so $W = \\\\vec{F}\\\\cdot\\\\vec{d}$ (the projection of $\\\\vec{F}$ onto $\\\\vec{d}$) (**section 1.11**). Hence applying the dot product definition to evaluate this (**section 1.8**):\\n\\n***\\n\\n$$\\n\\\\begin{aligned}\\nW & = \\\\vec{F}\\\\cdot \\\\vec{d} \\\\\\\\\\n& = 100\\\\cdot10\\\\cos\\\\theta \\\\\\\\\\n& = 939.7\\\\text{J} \\n\\\\end{aligned}\\n$$\\n"
+            }
+          ],
+          "structuredTutorialSections": [
+            {
+              "position": 0,
+              "title": null,
+              "content": "Can you express the work done as a dot product (**section 1.11**)?\\n\\n\\n***\\n\\nEvaluate the dot product using the dot product definition (**section 1.8**).\\n"
+            }
+          ],
+          "responseAreas": [
+            {
+              "position": 0,
+              "responseType": "NUMERIC_UNITS",
+              "answer": "939.7 J",
+              "preResponseText": "$W=$"
+            }
+          ]
+        },
+        {
+          "position": 1,
+          "content": "Why does he not pull at a shallower angle (closer to the horizontal)?\\n",
+          "answerContent": "",
+          "workedSolutionSections": [
+            {
+              "position": 0,
+              "title": "",
+              "content": "Pulling at a shallower angle (closer to horizontal) would require less work or allow him to pull less strongly, but it reduces the reaction force that he feels too, which reduces his maximum pulling force, and also allow him to gain more leverage as he pulls (he can lean forward and use his weight to pull whilst pivoted at his feet).&#x20;\\n"
+            }
+          ],
+          "structuredTutorialSections": [],
+          "responseAreas": [
+            {
+              "position": 0,
+              "responseType": "MULTIPLE_CHOICE",
+              "answer": [
+                "[true] ... reduces the reaction force acting on him, hence reducing the maximum pulling force.",
+                "[false] ... is a more awkward angle for the man to maintain, causing him to strain his muscles.",
+                "[false] ... increases the friction between the sledge and the ground, making it more difficult to move."
+              ],
+              "preResponseText": "Pulling at a shallower angle..."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

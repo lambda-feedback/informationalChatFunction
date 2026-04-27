@@ -18,11 +18,11 @@ class AzureLLMs:
                         temperature=temperature,
                         max_tokens=None,
                     )
-        self._azure_embedding = AzureOpenAIEmbeddings(azure_deployment=os.environ['AZURE_OPENAI_EMBEDDING_1536_DEPLOYMENT'], 
+        self._azure_embedding = AzureOpenAIEmbeddings(azure_deployment=os.environ['AZURE_OPENAI_EMBEDDING_1536_DEPLOYMENT'],
                                         openai_api_version=os.environ["AZURE_OPENAI_API_VERSION"],
                                         model=os.environ["AZURE_OPENAI_EMBEDDING_1536_MODEL"])
 
-    def get_llm(self):    
+    def get_llm(self):
         return self._azure_llm
 
     def get_embedding(self):
@@ -31,7 +31,7 @@ class AzureLLMs:
 class OllamaLLMs:
     def __init__(self):
         self._ollama_llm = Ollama(
-            model=os.environ['OLLAMA_MODEL'], # Any of the available models listed in the API docs
+            model=os.environ['OLLAMA_MODEL'],
             base_url=os.environ['OLLAMA_BASE_URL'],
             headers={
                 'X-API-Key': os.environ['OLLAMA_API_KEY'],
@@ -52,7 +52,7 @@ class OllamaLLMs:
 
     def get_embedding(self):
         return self._ollama_embedding
-    
+
 class OpenAILLMs:
     def __init__(self, temperature: int = 0):
         self._openai_llm = ChatOpenAI(
@@ -65,21 +65,20 @@ class OpenAILLMs:
             model='text-embedding-ada-002',
             api_key=os.environ['OPENAI_API_KEY'],
         )
-    
+
     def get_llm(self):
         return self._openai_llm
-    
+
     def get_embedding(self):
         return self._openai_embedding
 
 class GoogleAILLMs:
     def __init__(self, temperature: int = 0):
-
         self._google_llm = ChatGoogleGenerativeAI(
             model=os.environ['GOOGLE_AI_MODEL'],
             temperature=temperature,
             google_api_key=os.environ['GOOGLE_AI_API_KEY'],
         )
-    
+
     def get_llm(self):
         return self._google_llm

@@ -43,11 +43,11 @@ In GitHub, choose Use this template > Create a new repository in the repository 
 
 Choose the owner, and pick a name for the new repository.
 
-> [!IMPORTANT] If you want to deploy the evaluation function to Lambda Feedback, make sure to choose the Lambda Feedback organization as the owner.
+> [!IMPORTANT] If you want to deploy the chat function to Lambda Feedback, make sure to choose the `Lambda Feedback` organization as the owner.
 
-Set the visibility to Public or Private.
+Set the visibility to `Public` or `Private`.
 
-> [!IMPORTANT] If you want to use GitHub deployment protection rules, make sure to set the visibility to Public.
+> [!IMPORTANT] If you want to use GitHub deployment protection rules, make sure to set the visibility to `Public`.
 
 Click on Create repository.
 
@@ -78,9 +78,11 @@ Also, don't forget to update or delete the Quickstart chapter from the `README.m
 
 ## Development
 
-You can create your own invocation to your own agents hosted anywhere. Copy or update the `base_agent` from `src/agents/` and edit it to match your LLM agent requirements. Import the new invocation in the `module.py` file.
+You can create your own invocation to your own agents hosted anywhere. Copy or update the `agent.py` from `src/agent/` and edit it to match your LLM agent requirements. Import the new invocation in the `module.py` file.
 
-You agent can be based on an LLM hosted anywhere, you have available currently OpenAI, AzureOpenAI, and Ollama models but you can introduce your own API call in the `src/agents/llm_factory.py`.
+Your agent can be based on an LLM hosted anywhere. OpenAI, Google AI, Azure OpenAI, and Ollama are available out of the box via `src/agent/llm_factory.py`, and you can add your own provider there too.
+
+The agent uses **two separate LLM instances** — `self.llm` for chat responses and `self.summarisation_llm` for conversation summarisation and style analysis. By default both use the same provider, but you can point them at different models (e.g. a cheaper or faster model for summarisation) by changing the class in `agent.py`.
 
 ### Prerequisites
 
@@ -90,23 +92,41 @@ You agent can be based on an LLM hosted anywhere, you have available currently O
 ### Repository Structure
 
 ```bash
-.github/workflows/
-    dev.yml                           # deploys the DEV function to Lambda Feedback
-    main.yml                          # deploys the STAGING function to Lambda Feedback
-    test-report.yml                   # gathers Pytest Report of function tests
-
-docs/               # docs for devs and users
-
-src/module.py       # chat_module function implementation
-src/module_test.py  # chat_module function tests
-src/agents/         # find all agents developed for the chat functionality
-src/agents/utils/test_prompts.py      # allows testing of any LLM agent on a couple of example inputs containing Lambda Feedback Questions and synthetic student conversations
+.
+├── .github/workflows/
+│   ├── dev.yml                           # deploys the DEV function to Lambda Feedback
+│   ├── main.yml                          # deploys the STAGING and PROD functions to Lambda Feedback
+│   └── test-report.yml                   # gathers Pytest Report of function tests
+├── docs/                                 # docs for devs and users
+├── src/
+│   ├── agent/
+│   │   ├── agent.py                      # LangGraph stateful agent logic
+│   │   ├── context.py                    # converts muEd context dicts to LLM prompt text
+│   │   ├── llm_factory.py                # factory classes for each LLM provider
+│   │   └── prompts.py                    # system prompts defining the behaviour of the chatbot
+│   └── module.py
+└── tests/                                # contains all tests for the chat function
+    ├── example_inputs/                   # muEd example payloads for end-to-end tests
+    ├── manual_agent_requests.py          # allows testing of the docker container through API requests
+    ├── manual_agent_run.py               # allows testing of any LLM agent on a couple of example inputs
+    ├── utils.py                          # shared test helpers
+    ├── test_example_inputs.py            # pytests for the example input files
+    ├── test_index.py                     # pytests
+    └── test_module.py                    # pytests
 ```
 
 
 ## Testing the Chat Function
 
-To test your function, you can either call the code directly through a python script. Or you can build the respective chat function docker container locally and call it through an API request. Below you can find details on those processes.
+To test your function, you can run the unit tests, call the code directly through a python script, or build the respective chat function docker container locally and call it through an API request. Below you can find details on those processes.
+
+### Run Unit Tests
+
+You can run the unit tests using `pytest`.
+
+```bash
+pytest
+```
 
 ### Run the Chat Script
 
@@ -116,9 +136,9 @@ You can run the Python function itself. Make sure to have a main function in eit
 python src/module.py
 ```
 
-You can also use the `testbench_agents.py` script to test the agents with example inputs from Lambda Feedback questions and synthetic conversations.
+You can also use the `manual_agent_run.py` script to test the agents with example inputs from Lambda Feedback questions and synthetic conversations.
 ```bash
-python src/agents/utils/testbench_agents.py
+python tests/manual_agent_run.py
 ```
 
 ### Calling the Docker Image Locally
@@ -150,13 +170,13 @@ This will start the chat function and expose it on port `8080` and it will be op
 ```bash
 curl --location 'http://localhost:8080/2015-03-31/functions/function/invocations' \
 --header 'Content-Type: application/json' \
---data '{"body":"{\"message\": \"hi\", \"params\": {\"conversation_id\": \"12345Test\", \"conversation_history\": [{\"type\": \"user\", 
+--data '{"body":"{\"conversationId\": \"12345Test\", \"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}], \"user\": {\"type\": \"LEARNER\"}}"}'
 ```
 
 #### Call Docker Container
 ##### A. Call Docker with Python Requests
 
-In the `src/agents/utils` folder you can find the `requests_testscript.py` script that calls the POST URL of the running docker container. It reads any kind of input files with the expected schema. You can use this to test your curl calls of the chatbot.
+In the `tests/` folder you can find the `manual_agent_requests.py` script that calls the POST URL of the running docker container. It reads any kind of input files with the expected schema. You can use this to test your curl calls of the chatbot.
 
 ##### B. Call Docker Container through API request
 
@@ -169,22 +189,98 @@ http://localhost:8080/2015-03-31/functions/function/invocations
 Body (stringified within body for API request):
 
 ```JSON
-{"body":"{\"message\": \"hi\", \"params\": {\"conversation_id\": \"12345Test\", \"conversation_history\": [{\"type\": \"user\", \"content\": \"hi\"}]}}"}
+{"body":"{\"conversationId\": \"12345Test\", \"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}], \"user\": {\"type\": \"LEARNER\"}}"}
 ```
 
-Body with optional Params:
-```JSON
+Body with optional fields:
+```json
 {
-    "message":"hi",
-    "params":{
-        "conversation_id":"12345Test",
-        "conversation_history":[{"type":"user","content":"hi"}],
-        "summary":" ",
-        "conversational_style":" ",
-        "question_response_details": "",
-        "include_test_data": true,
-        "agent_type": {agent_name}
+  "conversationId": "<uuid>",
+  "messages": [
+    { "role": "USER", "content": "<previous user message>" },
+    { "role": "ASSISTANT", "content": "<previous assistant reply>" },
+    { "role": "USER", "content": "<current message>" }
+  ],
+  "user": {
+    "type": "LEARNER",
+    "preference": {
+      "conversationalStyle": "<stored style string>"
+    },
+    "taskProgress": {
+      "timeSpentOnQuestion": "30 minutes",
+      "accessStatus": "a good amount of time spent on this question today.",
+      "markedDone": "This question is still being worked on.",
+      "currentPart": {
+        "position": 0,
+        "timeSpentOnPart": "10 minutes",
+        "markedDone": "This part is not marked done.",
+        "responseAreas": [
+          {
+            "responseType": "EXPRESSION",
+            "totalSubmissions": 3,
+            "wrongSubmissions": 2,
+            "latestSubmission": {
+              "submission": "<student's last answer>",
+              "feedback": "<feedback text from evaluator>",
+              "answer": "<reference answer used for evaluation>"
+            }
+          }
+        ]
+      }
     }
+  },
+  "context": {
+    "summary": "<compressed conversation history>",
+    "set": {
+      "title": "Fundamentals",
+      "number": 2,
+      "description": "<set description>"
+    },
+    "question": {
+      "title": "Understanding Polymorphism",
+      "number": 3,
+      "guidance": "<teacher guidance>",
+      "content": "<master question content>",
+      "estimatedTime": "15-25 minutes",
+      "parts": [
+        {
+          "position": 0,
+          "content": "<part prompt>",
+          "answerContent": "<part answer>",
+          "workedSolutionSections": [
+            { "position": 0, "title": "Step 1", "content": "..." }
+          ],
+          "structuredTutorialSections": [
+            { "position": 0, "title": "Hint", "content": "..." }
+          ],
+          "responseAreas": [
+            {
+              "position": 0,
+              "responseType": "EXPRESSION",
+              "answer": "<reference answer>",
+              "preResponseText": "<label shown before input>"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
+Response:
+
+```json
+{
+  "output": {
+    "role": "ASSISTANT",
+    "content": "<assistant reply text>"
+  },
+  "metadata": {
+    "summary": "<updated conversation summary>",
+    "conversationalStyle": "<updated style string>",
+    "processingTimeMs": 1234
+  }
 }
 ```
 

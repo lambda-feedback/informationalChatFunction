@@ -1,0 +1,7 @@
+{
+  "conversationId": "example-conversation-id-0",
+  "messages": [
+    { "role": "USER", "content": "Hi, how do I solve this problem?" }
+  ],
+  "user": { "type": "LEARNER" }
+}
