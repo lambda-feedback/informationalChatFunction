@@ -1,14 +1,19 @@
-name: Dev deployment of chatbot lambda function
+name: Deploy to Staging
 
 on:
   push:
-    branches: [dev]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   test:
-    name: Dev deployment of chatbot lambda function
+    name: Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix:
@@ -28,20 +33,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      # - name: Load cached venv
-      #   id: dependencies-cache
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: .venv
-      #     key: venv-${{ runner.os }}-${{ steps.python-setup.outputs.python-version }}
-
-      - name: Create Venv if Cache not found
-        # if: steps.dependencies-cache.outputs.cache-hit != 'true'
-        run: |
-          python -m venv .venv
+      - name: Create Venv
+        run: python -m venv .venv
 
       - name: Install dependencies
-        # if: steps.dependencies-cache.outputs.cache-hit != 'true'
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
@@ -61,28 +56,19 @@ jobs:
           path: ./reports/pytest.xml
           if-no-files-found: warn
 
-  build:
-    name: Build Docker Image
-    uses: lambda-feedback/chat-function-workflows/.github/workflows/gh_build.yml@main
-    needs: test
-    permissions:
-      contents: read
-      id-token: write
-      packages: write
-
   deploy:
     name: Deploy to Lambda Feedback
-    uses: lambda-feedback/chat-function-workflows/.github/workflows/dev_deploy.yml@main
     needs: test
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    uses: lambda-feedback/chat-function-workflows/.github/workflows/deploy.yml@main
     with:
       template-repository-name: "lambda-feedback/chat-function-boilerplate"
-      # allow for developer to specify the environment variables that are used by the deployed AWS Lambda. Default to mock then admin can update.
+      environment: "staging"
       deployed-environment-variables: '[\"OPENAI_API_KEY\",\"OPENAI_MODEL\",\"GOOGLE_AI_API_KEY\",\"GOOGLE_AI_MODEL\"]'
-    permissions:
-      contents: read
-      id-token: write
-      packages: write
     secrets:
-      aws-access-key-id: ${{ secrets.LAMBDA_CONTAINER_PIPELINE_AWS_ID }}
-      aws-secret-key: ${{ secrets.LAMBDA_CONTAINER_PIPELINE_AWS_SECRET}}
+      aws-key-id: ${{ secrets.LAMBDA_CONTAINER_PIPELINE_AWS_ID }}
+      aws-secret-key: ${{ secrets.LAMBDA_CONTAINER_PIPELINE_AWS_SECRET }}
       function-admin-api-key: ${{ secrets.FUNCTION_ADMIN_API_KEY }}

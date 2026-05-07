@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a boilerplate for creating AI educational chatbots that integrate with the **Lambda-Feedback** educational platform. It deploys as an AWS Lambda function (containerized via Docker) that receives student chat messages with educational context and returns LLM-powered chatbot responses.
+This is a boilerplate for creating AI educational chatbots that integrate with the **Lambda-Feedback** educational platform. It deploys as an AWS Lambda function (containerized via Docker) that receives student chat messages with educational context and returns LLM-powered chatbot responses. Incoming requests follow the [muEd API](https://mued.org/) schema (`context`, `user`, `messages`).
 
 ## Commands
 
@@ -25,7 +25,7 @@ docker run --env-file .env -p 8080:8080 llm_chat
 ```bash
 curl -X POST http://localhost:8080/2015-03-31/functions/function/invocations \
   -H 'Content-Type: application/json' \
-  -d '{"body":"{\"conversationId\": \"12345Test\", \"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}], \"user\": {\"type\": \"LEARNER\"}}"}'
+  -d '{"body":"{\"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}]}"}'
 ```
 
 **Run a single test:**
@@ -83,6 +83,7 @@ The agent uses **two separate LLM instances** — `self.llm` for chat responses 
 
 ## Deployment
 
-- Pushing to `dev` branch triggers the dev deployment GitHub Actions workflow
-- Pushing to `main` triggers staging deployment, with manual approval required for production
+- Pull requests: `.github/workflows/test-lint.yml` runs pytest only
+- Pushing to `main`: `.github/workflows/staging-deploy.yml` runs tests then deploys to AWS staging via the shared `lambda-feedback/chat-function-workflows` reusable workflows
+- Production: `.github/workflows/production-deploy.yml` is `workflow_dispatch`-only with a `version-bump` input; redeploys staging, pauses on the `production-override` GitHub Environment for manual approval, then creates a `vX.Y.Z` tag + GitHub Release and deploys to prod
 - All environment variables (API keys, model names) are injected via GitHub Actions secrets/variables — do not hardcode them

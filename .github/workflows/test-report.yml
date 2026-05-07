@@ -2,7 +2,7 @@ name: Test Report
 
 on:
   workflow_run:
-    workflows: ["Build, Test and Deploy"]
+    workflows: ["Deploy to Staging", "Deploy to Production", "Test and Lint"]
     types:
       - completed
 

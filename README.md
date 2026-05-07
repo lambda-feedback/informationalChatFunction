@@ -1,6 +1,11 @@
 # Lambda Feedback Chat Function Boilerplate
 
-This repository contains the code needed to develop a modular chatbot to be used on Lambda-Feedback platform [written in Python].
+This repository contains the code needed to develop a modular chatbot to be used on Lambda-Feedback platform [written in Python]. The chat function consumes the [muEd API](https://mued.org/) request schema — the `context`, `user`, and `messages` fields in incoming requests follow the muEd format and are translated into a tutoring prompt by `src/agent/context.py`.
+
+## Deployment
+[![Create Release Request](https://img.shields.io/badge/Create%20Release%20Request-blue?style=for-the-badge)](https://github.com/lambda-feedback/{REPO_NAME_HERE}/issues/new?template=release-request.yml)
+
+To deploy to production, update the README button above to point to the correct repository.
 
 ## Quickstart
 
@@ -66,7 +71,7 @@ You're ready to start developing your chat function. Head over to the [Developme
 
 You will have to add your API key and LLM model name into the Github repo settings. Under `Secrets and variables/Actions`: the API key must be added as a secret and the LLM model must be added as a variable.
 
-You must ensure the same namings as in your `.env` file. So, make sure to update the `.github/{dev and main}.yml` files with the correct parameter names. 
+You must ensure the same namings as in your `.env` file. So, make sure to update the `.github/workflows/{staging-deploy,production-deploy,test-lint}.yml` files with the correct parameter names. 
 
 For more information, check the section below [Deploy to Lambda Feedback](#deploy-to-lambda-feedback).
 
@@ -78,7 +83,7 @@ Also, don't forget to update or delete the Quickstart chapter from the `README.m
 
 ## Development
 
-You can create your own invocation to your own agents hosted anywhere. To modify the behaviour of the chatbot, simply edit the prompts in `src/agent/prompts.py`. Or if you want to create a custom agent, copy or update the `agent.py` from `src/agent/` and edit it to match your LLM agent requirements. Import the new invocation in the `module.py` file.
+To modify the behaviour of the chatbot, simply edit the prompts in `src/agent/prompts.py`. Or if you want to create a custom agent, copy or update the `agent.py` from `src/agent/` and edit it to match your LLM agent requirements. Import the new invocation in the `module.py` file.
 
 Your agent can be based on an LLM hosted anywhere. OpenAI, Google AI, Azure OpenAI, and Ollama are available out of the box via `src/agent/llm_factory.py`, and you can add your own provider there too.
 
@@ -94,8 +99,9 @@ The agent uses **two separate LLM instances** — `self.llm` for chat responses 
 ```bash
 .
 ├── .github/workflows/
-│   ├── dev.yml                           # deploys the DEV function to Lambda Feedback
-│   ├── main.yml                          # deploys the STAGING and PROD functions to Lambda Feedback
+│   ├── test-lint.yml                     # runs pytest on pull requests
+│   ├── staging-deploy.yml                # tests + deploys to STAGING on push to main
+│   ├── production-deploy.yml             # manual dispatch: version bump, tag, release, deploy to PROD
 │   └── test-report.yml                   # gathers Pytest Report of function tests
 ├── docs/                                 # docs for devs and users
 ├── src/
@@ -156,7 +162,7 @@ To run the Docker image, use the following command:
 ##### A. Without .env file:
 
 ```bash
-docker run -e OPENAI_API_KEY={your key} -e OPENAI_MODEL={your LLM chosen model name} -p 8080:8080 llm_chat
+docker run -e OPENAI_API_KEY={your key} -e OPENAI_MODEL={your LLM model name} -p 8080:8080 llm_chat
 ```
 
 ##### B. With container name (for interaction, e.g. copying file from inside the docker container):
@@ -170,7 +176,7 @@ This will start the chat function and expose it on port `8080` and it will be op
 ```bash
 curl --location 'http://localhost:8080/2015-03-31/functions/function/invocations' \
 --header 'Content-Type: application/json' \
---data '{"body":"{\"conversationId\": \"12345Test\", \"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}], \"user\": {\"type\": \"LEARNER\"}}"}'
+--data '{"body":"{\"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}]}"}'
 ```
 
 #### Call Docker Container
@@ -186,13 +192,15 @@ POST URL:
 http://localhost:8080/2015-03-31/functions/function/invocations
 ```
 
-Body (stringified within body for API request):
+Per the [muEd `ChatRequest` schema](https://mued.org/), only `messages` is required; `conversationId`, `user`, `context`, and `configuration` are all optional.
+
+**Minimal request — only required components** (stringified within `body` for the AWS Lambda Runtime Interface Emulator):
 
 ```JSON
-{"body":"{\"conversationId\": \"12345Test\", \"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}], \"user\": {\"type\": \"LEARNER\"}}"}
+{"body":"{\"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}]}"}
 ```
 
-Body with optional fields:
+**Full request as Lambda Feedback sends it** — all optional fields populated:
 ```json
 {
   "conversationId": "<uuid>",
@@ -288,13 +296,17 @@ Response:
 
 Deploying the chat function to Lambda Feedback is simple and straightforward, as long as the repository is within the [Lambda Feedback organization](https://github.com/lambda-feedback).
 
-During development, we recommend using the **`dev`** branch. This branch will deploy a version of the function onto AWS using the [GitHub Actions Dev workflow](.github/workflows/dev.yml). After deploying, please, contact one of the Lambda Feedback admins to allow the function to be accessible onto `dev.lambdafeedback.com`.
+The pipeline has two environments: **staging** and **production**.
 
-> [!WARNING] The dev environment of the platform is always under use, so the platform might have beta/in-testing features that might cause unexpected issues.
+**Staging** — Pushing to the `main` branch triggers the [Staging deploy workflow](.github/workflows/staging-deploy.yml), which runs the test suite and (on success) deploys the chat function to AWS staging. After deploying, please contact one of the Lambda Feedback admins to allow the function to be accessible on `staging.lambdafeedback.com`.
 
-After you are pleased with the performance of your Chatbot and have configured the repository, a [GitHub Actions workflow](.github/workflows/main.yml) will automatically build and deploy the chat function to Lambda Feedback as soon as changes are pushed to the main branch of the repository. This deployment will upload the function onto `staging.lambdafeedback.com`, and will also initiate an `approval` stage for prod environment. Once you reach this stage, please contact an admin from Lambda Feedback to review the code and approve it such that the code can be accessible onto the main [Lambda Feedback platform](https://www.lambdafeedback.com/).
+> [!WARNING] The staging environment of the platform is always under use and may include beta/in-testing features that can cause unexpected issues.
 
-> [!NOTE] Once the deployment in the **`dev`** or **`main`** branch has been successful, share your necessary environment variables (e.g. API key and LLM model) with one of the Lambda Feedback team member.
+**Production** — Once you are happy with the staging deployment, run the [Production deploy workflow](.github/workflows/production-deploy.yml) manually from the GitHub Actions tab. Pick a `version-bump` (`patch`/`minor`/`major`); the workflow will redeploy staging, then pause on a manual approval gate (the `production-override` GitHub Environment, reviewed by a Lambda Feedback admin), then create a `vX.Y.Z` git tag + GitHub Release and deploy to the main [Lambda Feedback platform](https://www.lambdafeedback.com/).
+
+**Pull requests** — The [Test and Lint workflow](.github/workflows/test-lint.yml) runs the test suite on every PR; no deploy.
+
+> [!NOTE] Once a deployment has been successful, share your necessary environment variables (e.g. API key and LLM model) with one of the Lambda Feedback team members.
 
 ## Troubleshooting
 
