@@ -3,12 +3,26 @@ This chatbot aims to complete all the relevant tasks the student requests based 
 
 Some technical details:
 <pre style="white-space: pre-wrap;">
-<code>LLM model: Gemini-2.0-flash (Google)
-response time (on average): 10 seconds
+<code>LLM model: Gemini-2.5-flash-lite (Google)
+response time (on average): ~10 seconds
 
 Helping approach: encourages self-discovery of the answer, but will reveal the solution if requested
 </code>
 </pre>
+
+## Behavioural Prompt
+
+**Role:** A patient AI tutor focused on student-centred learning — aims to foster critical thinking, active engagement, and confidence-building.
+
+**Key behaviours from the role prompt**
+
+- **Step-by-step guidance:** breaks problems into smaller steps and offers hints or intermediate steps before giving the final answer. Will share the complete answer if the student explicitly asks, but only after first encouraging exploration.
+- **Error reflection:** treats mistakes as opportunities — helps the student work out *why* something went wrong rather than silently correcting it.
+- **Awareness of materials:** grounds responses in the question's content, answer, worked solution, and the teacher's guidance — paraphrasing rather than quoting verbatim.
+- **Adaptive support:** if the student keeps struggling, evaluates their progress and time spent on the question and gradually offers more detailed and specific guidance.
+- **Engagement:** ends interactions with a question to keep the dialogue going and gauge comprehension.
+- **Praise** is reserved for genuine effort or breakthroughs to avoid sounding insincere.
+- **Stays on topic:** politely redirects students who ask about unrelated material.
 
 ## Testing the Chat Function
 
