@@ -1,4 +1,4 @@
-from src.agent.llm_factory import OpenAILLMs, GoogleAILLMs
+from src.agent.llm_factory import GoogleAILLMs
 from src.agent.prompts import \
     role_prompt, conv_pref_prompt, update_conv_pref_prompt, summary_prompt, update_summary_prompt, summary_system_prompt
 

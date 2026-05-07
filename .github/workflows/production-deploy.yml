@@ -1,0 +1,38 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version-bump:
+        description: "Version bump type"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+      branch:
+        description: "Branch to release from"
+        required: true
+        type: string
+        default: "main"
+
+jobs:
+  deploy:
+    name: Deploy to Lambda Feedback
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    uses: lambda-feedback/chat-function-workflows/.github/workflows/deploy.yml@main
+    with:
+      template-repository-name: "lambda-feedback/chat-function-boilerplate"
+      environment: "production"
+      version-bump: ${{ inputs.version-bump }}
+      branch: ${{ inputs.branch }}
+      deployed-environment-variables: '[\"OPENAI_API_KEY\",\"OPENAI_MODEL\",\"GOOGLE_AI_API_KEY\",\"GOOGLE_AI_MODEL\"]'
+    secrets:
+      aws-key-id: ${{ secrets.LAMBDA_CONTAINER_PIPELINE_AWS_ID }}
+      aws-secret-key: ${{ secrets.LAMBDA_CONTAINER_PIPELINE_AWS_SECRET }}
+      function-admin-api-key: ${{ secrets.FUNCTION_ADMIN_API_KEY }}
