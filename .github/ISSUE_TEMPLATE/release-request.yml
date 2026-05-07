@@ -6,6 +6,18 @@ labels:
   - deployment
 assignees: []
 body:
+  - type: markdown
+    attributes:
+      value: |
+        ## How this works
+
+        1. **Fill in this form** (description of changes, branch, version bump). Do not submit yet.
+        2. **Scroll to the bottom and open the *Production deploy* workflow link in a new tab** — it disappears after you submit this form, so you need it open beforehand.
+        3. **Submit this issue** to record the release request and start the workflow.
+        4. The workflow redeploys staging, then pauses on the **manual approval gate** — a Lambda Feedback admin reviews this issue and approves the run there.
+        5. Once approved, a `vX.Y.Z` git tag and GitHub Release are created and the function is deployed to production.
+        6. Once the release is live, post a comment on this issue with the URL of the new GitHub Release (e.g. `https://github.com/<org>/<repo>/releases/tag/vX.Y.Z`) and then close the issue. This helps us keep track of which releases correspond to which requests.
+
   - type: textarea
     id: description_of_changes
     attributes:
@@ -48,6 +60,10 @@ body:
         ---
         ### ⚡ Click the Link Below to Run the Workflow
 
+        ⚠️ Open the workflow page in a new tab before submitting the issue, because the link to the workflow run page will disappear after submission.
+
         Clicking the link will take you to the Actions page. You will need to click the **"Run workflow"** button there to start the process.
+        Select the same branch and version bump type you entered in this form, then click the green **"Run workflow"** button.
+
 
         ## [➡️ Go to Workflow Run Page](../actions/workflows/production-deploy.yml)
