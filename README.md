@@ -3,9 +3,9 @@
 This repository contains a chat function connecting students to an AI educational chatbot used on Lambda-Feedback platform [written in Python]. The chat function consumes the [muEd API](https://mued.org/) request schema — the `context`, `user`, and `messages` fields in incoming requests follow the muEd format and are translated into a tutoring prompt by `src/agent/context.py`.
 
 ## Deployment
-[![Create Release Request](https://img.shields.io/badge/Create%20Release%20Request-blue?style=for-the-badge)](https://github.com/lambda-feedback/{REPO_NAME_HERE}/issues/new?template=release-request.yml)
+[![Create Release Request](https://img.shields.io/badge/Create%20Release%20Request-blue?style=for-the-badge)](https://github.com/lambda-feedback/informationalChatFunction/issues/new?template=release-request.yml)
 
-To deploy to production, update the README button above to point to the correct repository.
+To deploy to production.
 
 ## Quickstart
 
