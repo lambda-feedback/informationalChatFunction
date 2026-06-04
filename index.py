@@ -32,5 +32,4 @@ def handler(event, context):
         }
 
     response = {"statusCode": 200, "body": result.model_dump_json()}
-    print("Returning response:", " ".join(json.dumps(response, indent=2).splitlines()))
     return response
