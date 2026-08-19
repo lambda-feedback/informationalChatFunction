@@ -1,18 +1,14 @@
-ARG PYTHON_VERSION=3.13
+ARG BASE_VERSION=python:3.12
 
-FROM public.ecr.aws/lambda/python:${PYTHON_VERSION}
+# evaluation-function-base's python image bundles the shimmy binary,
+# the Lambda RIE, and the entrypoint.sh that picks between them.
+FROM ghcr.io/lambda-feedback/evaluation-function-base/${BASE_VERSION}
 
-# Set working directory
-WORKDIR ${LAMBDA_TASK_ROOT}
+RUN apt-get update && apt-get install -y \
+      build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --upgrade pip 
-RUN dnf install -y git \
-    && dnf install -y \
-      gcc \
-      gcc-c++ \
-      make \
-      python3-devel \
-    && dnf clean all
+RUN pip install --upgrade pip
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
@@ -27,5 +23,15 @@ COPY index.py .
 
 COPY tests ./tests
 
-# Set the Lambda function handler
-CMD ["index.handler"]
+# Command shimmy uses to start the chat function worker
+ENV FUNCTION_COMMAND="python"
+
+# Args to start the chat function worker with
+ENV FUNCTION_ARGS="index.py"
+
+# The transport to use for the RPC server
+ENV FUNCTION_RPC_TRANSPORT="ipc"
+
+ENV FUNCTION_WORKER_SEND_TIMEOUT="170s"
+
+ENV LOG_LEVEL="debug"

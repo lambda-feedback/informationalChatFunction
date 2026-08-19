@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from langchain_openai import AzureChatOpenAI
 from langchain_openai import AzureOpenAIEmbeddings
@@ -82,3 +83,19 @@ class GoogleAILLMs:
 
     def get_llm(self):
         return self._google_llm
+
+class ChatOpenRouterProvider:
+    def __init__(self, temperature: int = 0, model: Optional[str] = None):
+        model_name = model or os.environ['OPENROUTER_MODEL']
+        key = os.environ['OPENROUTER_API_KEY']
+        base_url = os.environ['OPENROUTER_BASE_URL']
+
+        self._openrouter_llm = ChatOpenAI(
+            model=model_name,
+            temperature=temperature,
+            api_key=key,
+            base_url=base_url,
+        )
+
+    def get_llm(self):
+        return self._openrouter_llm

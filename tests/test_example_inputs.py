@@ -1,7 +1,8 @@
 import unittest
 import json
 import os
-from index import handler
+from lf_toolkit.chat import ChatRequest
+from src.module import chat_module
 from tests.utils import assert_valid_chat_request, assert_valid_chat_response
 
 EXAMPLE_INPUTS_DIR = "tests/example_inputs"
@@ -17,9 +18,10 @@ class TestExampleInputs(unittest.TestCase):
         with open(os.path.join(EXAMPLE_INPUTS_DIR, filename)) as f:
             payload = json.load(f)
         assert_valid_chat_request(self, payload)
-        result = handler({"body": json.dumps(payload)}, None)
+        request = ChatRequest.model_validate(payload)
+        result = chat_module(request)
         assert_valid_chat_response(self, result)
-        return payload, json.loads(result["body"])
+        return payload, json.loads(result.model_dump_json())
 
     def test_example_input_0_simple(self):
         self._test("example_input_0.json")

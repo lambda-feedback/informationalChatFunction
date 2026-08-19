@@ -22,19 +22,15 @@ OPENAI_MODEL
 GOOGLE_AI_API_KEY
 GOOGLE_AI_MODEL
 ```
-
-> [!Note]
-> If you decide to use another endpoint such as Azure or Ollama or any other, please update the github workflow files to use the right secrets and variables for testing.
+> If you use OpenRouter:
 ```bash
-> If you use Azure-OpenAI:
-AZURE_OPENAI_API_KEY
-AZURE_OPENAI_ENDPOINT
-AZURE_OPENAI_API_VERSION
-AZURE_OPENAI_CHAT_DEPLOYMENT_NAME
-AZURE_OPENAI_EMBEDDING_3072_DEPLOYMENT
-AZURE_OPENAI_EMBEDDING_1536_DEPLOYMENT
-AZURE_OPENAI_EMBEDDING_3072_MODEL
-AZURE_OPENAI_EMBEDDING_1536_MODEL
+OPENROUTER_API_KEY
+OPENROUTER_MODEL
+OPENROUTER_BASE_URL
+```
+
+> [!NOTE]
+> If you decide to use other providers like Azure OpenAI or Ollama, you will need to update the workflow files and the `llm_factory.py` file to include the necessary environment variables for those providers.
 
 > For monitoring of the LLM calls (follow instructions on how to set up on langsmith online):
 LANGCHAIN_TRACING_V2
@@ -117,7 +113,6 @@ The agent uses **two separate LLM instances** — `self.llm` for chat responses 
     ├── manual_agent_run.py               # allows testing of any LLM agent on a couple of example inputs
     ├── utils.py                          # shared test helpers
     ├── test_example_inputs.py            # pytests for the example input files
-    ├── test_index.py                     # pytests
     └── test_module.py                    # pytests
 ```
 
@@ -128,18 +123,18 @@ To test your function, you can run the unit tests, call the code directly throug
 
 ### Run Unit Tests
 
-You can run the unit tests using `pytest`.
+You can run the unit tests using `pytest`. Run it from the repository root with `PYTHONPATH=.` set (as CI does) so the `tests` and `src` packages resolve correctly:
 
 ```bash
-pytest
+PYTHONPATH=. pytest
 ```
 
 ### Run the Chat Script
 
-You can run the Python function itself. Make sure to have a main function in either `src/module.py` or `index.py`.
+You can run the Python function itself directly — `index.py` wires `chat_module`/`chat_health_module` into `lf_toolkit`'s RPC server, the same way shimmy invokes it inside the container. This requires the `EVAL_IO`/`EVAL_RPC_TRANSPORT` environment variables shimmy would normally set (see `lf_toolkit`'s docs), so prefer the Docker or `manual_agent_run.py` routes below for everyday testing.
 
 ```bash
-python src/module.py
+python index.py
 ```
 
 You can also use the `manual_agent_run.py` script to test the agents with example inputs from Lambda Feedback questions and synthetic conversations.
@@ -171,33 +166,41 @@ docker run -e OPENAI_API_KEY={your key} -e OPENAI_MODEL={your LLM model name} -p
 docker run --env-file .env -it --name my-lambda-container -p 8080:8080 llm_chat
 ```
 
-This will start the chat function and expose it on port `8080` and it will be open to be curl:
+This starts shimmy (the [Lambda Feedback shim](https://github.com/lambda-feedback/shimmy)) as the container's entrypoint, which spawns this function as a worker subprocess and exposes it on port `8080` as the muEd chat API:
 
 ```bash
-curl --location 'http://localhost:8080/2015-03-31/functions/function/invocations' \
+curl --location 'http://localhost:8080/chat' \
 --header 'Content-Type: application/json' \
---data '{"body":"{\"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}]}"}'
+--header 'X-Api-Version: 0.1.0' \
+--data '{"messages": [{"role": "USER", "content": "hi"}]}'
+```
+
+Health check:
+
+```bash
+curl --location 'http://localhost:8080/chat/health' \
+--header 'X-Api-Version: 0.1.0'
 ```
 
 #### Call Docker Container
 ##### A. Call Docker with Python Requests
 
-In the `tests/` folder you can find the `manual_agent_requests.py` script that calls the POST URL of the running docker container. It reads any kind of input files with the expected schema. You can use this to test your curl calls of the chatbot.
+In the `tests/` folder you can find the `manual_agent_requests.py` script that calls the `/chat` and `/chat/health` routes of the running docker container. It reads any kind of input files with the expected schema. You can use this to test your curl calls of the chatbot.
 
 ##### B. Call Docker Container through API request
 
 POST URL:
 
 ```bash
-http://localhost:8080/2015-03-31/functions/function/invocations
+http://localhost:8080/chat
 ```
 
-Per the [muEd `ChatRequest` schema](https://mued.org/), only `messages` is required; `conversationId`, `user`, `context`, and `configuration` are all optional.
+Per the [muEd `ChatRequest` schema](https://mued.org/), only `messages` is required; `conversationId`, `user`, `context`, and `configuration` are all optional. Requests may include an `X-Api-Version: 0.1.0` header.
 
-**Minimal request — only required components** (stringified within `body` for the AWS Lambda Runtime Interface Emulator):
+**Minimal request — only required components:**
 
 ```JSON
-{"body":"{\"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}]}"}
+{"messages": [{"role": "USER", "content": "hi"}]}
 ```
 
 **Full request as Lambda Feedback sends it** — all optional fields populated:

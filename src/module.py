@@ -1,8 +1,8 @@
 import time
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 
-from lf_toolkit.chat import ChatRequest, ChatResponse, Message
-from lf_toolkit.shared.mued_api_v0_1_0 import Role
+from lf_toolkit.chat import ChatCapabilities, ChatHealthResponse, ChatRequest, ChatResponse, Message
+from lf_toolkit.shared.mued_api_v0_1_0 import DataPolicySupport, HealthStatus, Role
 
 from src.agent.context import parse_json_to_prompt
 from src.agent.agent import invoke_base_agent
@@ -58,6 +58,22 @@ def chat_module(request: ChatRequest) -> ChatResponse:
             "conversationalStyle": chatbot_response["conversationalStyle"],
             "processingTimeMs": round((end_time - start_time) * 1000),
         },
+    )
+
+
+def chat_health_module() -> ChatHealthResponse:
+    """
+    Health-check entry point — reports whether this chat function is up and
+    what it supports, for the shim's GET /chat/health.
+    """
+    return ChatHealthResponse(
+        status=HealthStatus.OK,
+        capabilities=ChatCapabilities(
+            supportsChat=True,
+            supportsUserPreferences=False,
+            supportsStreaming=False,
+            supportsDataPolicy=DataPolicySupport.NOT_SUPPORTED,
+        ),
     )
 
 
