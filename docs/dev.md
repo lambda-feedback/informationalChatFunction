@@ -30,10 +30,10 @@ To test your function, you can run the unit tests, call the code directly throug
 
 ### Run Unit Tests
 
-You can run the unit tests using `pytest`.
+You can run the unit tests using `pytest`. Run it from the repository root with `PYTHONPATH=.` set (as CI does) so the `tests` and `src` packages resolve correctly:
 
 ```bash
-pytest
+PYTHONPATH=. pytest
 ```
 
 ### Run the Chat Script
@@ -67,31 +67,39 @@ docker run -e OPENAI_API_KEY={your key} -e OPENAI_MODEL={your LLM chosen model n
 docker run --env-file .env -it --name my-lambda-container -p 8080:8080 llm_chat
 ```
 
-This will start the chat function and expose it on port `8080` and it will be open to be curl:
+This starts shimmy (the [Lambda Feedback shim](https://github.com/lambda-feedback/shimmy)) as the container's entrypoint, which spawns this function as a worker subprocess and exposes it on port `8080` as the muEd chat API:
 
 ```bash
-curl --location 'http://localhost:8080/2015-03-31/functions/function/invocations' \
+curl --location 'http://localhost:8080/chat' \
 --header 'Content-Type: application/json' \
---data '{"body":"{\"conversationId\": \"12345Test\", \"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}], \"user\": {\"type\": \"LEARNER\"}}"}'
+--header 'X-Api-Version: 0.1.0' \
+--data '{"conversationId": "12345Test", "messages": [{"role": "USER", "content": "hi"}], "user": {"type": "LEARNER"}}'
+```
+
+Health check:
+
+```bash
+curl --location 'http://localhost:8080/chat/health' \
+--header 'X-Api-Version: 0.1.0'
 ```
 
 #### Call Docker Container
 ##### A. Call Docker with Python Requests
 
-In the `tests/` folder you can find the `manual_agent_requests.py` script that calls the POST URL of the running docker container. It reads any kind of input files with the expected schema. You can use this to test your curl calls of the chatbot.
+In the `tests/` folder you can find the `manual_agent_requests.py` script that calls the `/chat` and `/chat/health` routes of the running docker container. It reads any kind of input files with the expected schema. You can use this to test your curl calls of the chatbot.
 
 ##### B. Call Docker Container through API request
 
 POST URL:
 
 ```bash
-http://localhost:8080/2015-03-31/functions/function/invocations
+http://localhost:8080/chat
 ```
 
-Body (stringified within body for API request):
+Body (requests may include an `X-Api-Version: 0.1.0` header):
 
 ```JSON
-{"body":"{\"conversationId\": \"12345Test\", \"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}], \"user\": {\"type\": \"LEARNER\"}}"}
+{"conversationId": "12345Test", "messages": [{"role": "USER", "content": "hi"}], "user": {"type": "LEARNER"}}
 ```
 
 Body with optional fields:

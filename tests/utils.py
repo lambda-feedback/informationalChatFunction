@@ -12,16 +12,9 @@ def assert_valid_chat_request(test: unittest.TestCase, payload: dict):
     test.assertGreater(len(request.messages), 0, "messages must not be empty")
 
 
-def assert_valid_chat_response(test: unittest.TestCase, result):
-    """
-    Assert a result matches the expected muEd ChatResponse format.
-    Accepts either a ChatResponse object or a Lambda handler result dict.
-    """
-    if isinstance(result, ChatResponse):
-        body = json.loads(result.model_dump_json())
-    else:
-        test.assertEqual(result.get("statusCode"), 200)
-        body = json.loads(result["body"])
+def assert_valid_chat_response(test: unittest.TestCase, result: ChatResponse):
+    """Assert a ChatResponse matches the expected muEd ChatResponse format."""
+    body = json.loads(result.model_dump_json())
 
     output = body.get("output", {})
     test.assertEqual(output.get("role"), "ASSISTANT")

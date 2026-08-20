@@ -31,7 +31,7 @@ jobs:
       environment: "production"
       version-bump: ${{ inputs.version-bump }}
       branch: ${{ inputs.branch }}
-      deployed-environment-variables: '[\"OPENAI_API_KEY\",\"OPENAI_MODEL\",\"GOOGLE_AI_API_KEY\",\"GOOGLE_AI_MODEL\"]'
+      deployed-environment-variables: '[\"OPENAI_API_KEY\",\"OPENAI_MODEL\",\"GOOGLE_AI_API_KEY\",\"GOOGLE_AI_MODEL\",\"OPENROUTER_API_KEY\",\"OPENROUTER_MODEL\",\"OPENROUTER_BASE_URL\"]'
     secrets:
       aws-key-id: ${{ secrets.LAMBDA_CONTAINER_PIPELINE_AWS_ID }}
       aws-secret-key: ${{ secrets.LAMBDA_CONTAINER_PIPELINE_AWS_SECRET }}

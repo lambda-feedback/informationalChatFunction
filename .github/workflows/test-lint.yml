@@ -21,6 +21,9 @@ jobs:
       OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
       GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
       GOOGLE_AI_MODEL: ${{ vars.GOOGLE_AI_MODEL }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL }}
+      OPENROUTER_BASE_URL: ${{ vars.OPENROUTER_BASE_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

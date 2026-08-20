@@ -4,13 +4,13 @@ This file provides guidance to AI agents when working with code in this reposito
 
 ## Project Overview
 
-This is a chat function connecting students to an AI educational chatbot that is integrated with the **Lambda-Feedback** educational platform. It deploys as an AWS Lambda function (containerized via Docker) that receives student chat messages with educational context and returns LLM-powered chatbot responses. Incoming requests follow the [muEd API](https://mued.org/) schema (`context`, `user`, `messages`).
+This is a chat function connecting students to an AI educational chatbot that is integrated with the **Lambda-Feedback** educational platform. It's containerized via Docker and deployed behind [shimmy](https://github.com/lambda-feedback/shimmy), a shim that spawns this function as a persistent JSON-RPC worker process and exposes it as the muEd `/chat` / `/chat/health` HTTP API (both locally and as an AWS Lambda container). It receives student chat messages with educational context and returns LLM-powered chatbot responses. Incoming requests follow the [muEd API](https://mued.org/) schema (`context`, `user`, `messages`).
 
 ## Commands
 
 **Testing:**
 ```bash
-pytest                              # Run all unit tests
+PYTHONPATH=. pytest                 # Run all unit tests (CI sets PYTHONPATH=. too)
 python tests/manual_agent_run.py   # Test agent locally with example inputs
 python tests/manual_agent_requests.py  # Test running Docker container
 ```
@@ -23,15 +23,18 @@ docker run --env-file .env -p 8080:8080 llm_chat
 
 **Manual API test (while Docker is running):**
 ```bash
-curl -X POST http://localhost:8080/2015-03-31/functions/function/invocations \
+curl -X POST http://localhost:8080/chat \
   -H 'Content-Type: application/json' \
-  -d '{"body":"{\"messages\": [{\"role\": \"USER\", \"content\": \"hi\"}]}"}'
+  -H 'X-Api-Version: 0.1.0' \
+  -d '{"messages": [{"role": "USER", "content": "hi"}]}'
+
+curl http://localhost:8080/chat/health -H 'X-Api-Version: 0.1.0'
 ```
 
 **Run a single test:**
 ```bash
 pytest tests/test_module.py        # Run specific test file
-pytest tests/test_index.py::test_function_name  # Run specific test
+pytest tests/test_module.py::TestChatModuleFunction::test_response_format  # Run specific test
 ```
 
 ## Architecture
@@ -39,23 +42,26 @@ pytest tests/test_index.py::test_function_name  # Run specific test
 ### Request Flow
 
 ```
-Lambda event → index.py (handler)
-  → validates via lf_toolkit ChatRequest schema
-  → src/module.py (chat_module)
-    → extracts muEd API context (messages, conversationId, question context, user type)
-    → parses educational context to prompt text via src/agent/context.py
-    → src/agent/agent.py (BaseAgent / LangGraph)
-      → routes to call_llm or summarize_conversation node
-      → calls LLM provider (OpenAI / Google / Azure / Ollama)
-  → returns ChatResponse (output, summary, conversationalStyle, processingTime)
+shimmy (shim, container entrypoint)
+  → spawns index.py as a persistent worker subprocess (lf_toolkit RPC server)
+  → forwards POST /chat / GET /chat/health as JSON-RPC "chat" / "chat/health" calls
+  → index.py registers src/module.py's chat_module / chat_health_module as handlers
+    → lf_toolkit validates the request body against the muEd ChatRequest schema
+    → src/module.py (chat_module)
+      → extracts muEd API context (messages, conversationId, question context, user type)
+      → parses educational context to prompt text via src/agent/context.py
+      → src/agent/agent.py (BaseAgent / LangGraph)
+        → routes to call_llm or summarize_conversation node
+        → calls LLM provider (OpenAI / Google / Azure / Ollama)
+    → returns ChatResponse (output, summary, conversationalStyle, processingTime)
 ```
 
 ### Key Files
 
 | File | Role |
 |------|------|
-| `index.py` | AWS Lambda entry point; parses event body, validates schema |
-| `src/module.py` | Transforms muEd API request → invokes agent → builds ChatResponse |
+| `index.py` | Worker entrypoint; registers `chat_module`/`chat_health_module` with `lf_toolkit`'s RPC server (`create_server()` + `run()`) |
+| `src/module.py` | Transforms muEd API request → invokes agent → builds ChatResponse; also exposes `chat_health_module()` |
 | `src/agent/agent.py` | LangGraph stateful graph; manages message history and summarization |
 | `src/agent/prompts.py` | System prompts for tutor behavior, summarization, style detection |
 | `src/agent/llm_factory.py` | Factory classes for each LLM provider (OpenAI, Google, Azure, Ollama) |
