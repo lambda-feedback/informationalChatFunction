@@ -5,8 +5,6 @@ from lf_toolkit.chat import ChatCapabilities, ChatHealthResponse, ChatRequest, C
 from lf_toolkit.shared.mued_api_v0_1_0 import DataPolicySupport, HealthStatus, Role
 
 from src.agent.context import parse_json_to_prompt
-from src.agent.agent import invoke_base_agent
-
 
 def chat_module(request: ChatRequest) -> ChatResponse:
     """
@@ -21,6 +19,7 @@ def chat_module(request: ChatRequest) -> ChatResponse:
     Edit src/agent/prompts.py to change the chatbot's behaviour.
     Edit src/agent/agent.py to change the agent logic (summarisation threshold, LLM provider, etc.).
     """
+    from src.agent.agent import invoke_base_agent
 
     conversation_id = request.conversationId
 
