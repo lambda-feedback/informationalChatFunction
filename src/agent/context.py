@@ -1,14 +1,12 @@
 from typing import Optional, Dict, Any
 
-from src.agent.prompts import response_format_prompt
-
 
 def parse_json_to_prompt(context: dict, task_progress: dict) -> str:
     """Convert muEd context and task progress directly into an LLM-friendly prompt string."""
 
     question = context.get("question")
     if not question:
-        return "# ERROR: Question details unavailable\n\nPlease describe the question you're working on so I can assist you effectively."
+        return "# ERROR: Question details unavailable\n\nNo question context is available for this session. Ask the student to describe the question they are working on."
 
     set_data = context.get("set", {})
     current_part = task_progress.get("currentPart", {}) if task_progress else {}
@@ -68,19 +66,8 @@ def parse_json_to_prompt(context: dict, task_progress: dict) -> str:
         sections.append(_format_part(part, part_position, is_current, time_on_part, submissions))
 
     # Combine
-    intro = (
-        "\n# Personalized Learning Assistant\n\n"
-        "I have detailed information about your current question, including your progress, responses, "
-        "and any feedback you've received. This context helps me provide targeted assistance based on "
-        "your specific situation.\n\n"
-    )
     valid_sections = [s.strip() for s in sections if s and s.strip()]
-    response_format = (
-        "# Response Formatting\n" + response_format_prompt
-        if response_format_prompt
-        else ""
-    )
-    content = intro + "\n".join(valid_sections) + "\n" + response_format
+    content = "\n".join(valid_sections)
     content = content.replace("&#x20;&#x20;", " ").replace("&#x20", " ")
     return "\n".join(line for line in content.split("\n") if line.strip() or not line).strip()
 
@@ -106,13 +93,13 @@ def _format_part(part: dict, part_position: int, is_current: bool, time_on_part:
     ra_block = f"\n### Response Areas\n\n{''.join(response_areas)}" if response_areas else ""
 
     answer = part.get("answerContent")
-    answer_block = f"### Final Answer\n\n{answer}" if answer else "### Final Answer\n\nNo direct answer specified for this part"
+    answer_block = f"### Final Answer (confidential)\n\n{answer}" if answer else "### Final Answer (confidential)\n\nNo direct answer specified for this part"
 
     solutions = [
         f"{ws.get('title', f'#### Solution {i+1}')}\n\n{ws.get('content', '').strip() or 'No content available'}"
         for i, ws in enumerate(part.get("workedSolutionSections", []))
     ]
-    solutions_block = "### Worked Solutions\n\n" + "\n".join(solutions) if solutions else "### Worked Solutions\n\nNone available"
+    solutions_block = "### Worked Solutions (confidential)\n\n" + "\n".join(solutions) if solutions else "### Worked Solutions (confidential)\n\nNone available"
 
     tutorials = [
         f"{ts.get('title', f'#### Tutorial {i+1}')}\n\n{ts.get('content', '').strip() or 'No content available'}"
@@ -139,10 +126,10 @@ def _get_student_work(ra_position: int, submissions: list) -> Dict[str, Any]:
 def _format_response_area(position: int, task_description: Optional[str], expected_answer: Any, student_work: Dict[str, Any]) -> str:
     task_text = f"- Task: {task_description}" if task_description else "- Task: Not specified"
     if not student_work.get("has_submissions"):
-        submission_text = "- Your Work on this response area: No response submitted yet"
+        submission_text = "- Student's work on this response area: No response submitted yet"
     else:
         submission_text = (
-            f"- Your Work on this response area:\n"
+            f"- Student's work on this response area:\n"
             f"  - Latest response: {student_work.get('latest_response', 'None')}\n"
             f"  - Latest feedback: {student_work.get('latest_feedback', 'None')}\n"
             f"  - Total attempts: {student_work.get('total_submissions', 0)} out of which {student_work.get('total_wrong', 0)} were incorrect"
