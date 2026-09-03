@@ -60,19 +60,27 @@ class GoogleAILLMs:
         return self._google_llm
 
 class OpenRouterLLMs:
-    def __init__(self, temperature: int = 0, model: Optional[str] = None):
+    def __init__(self, temperature: int = 0, model: Optional[str] = None, reasoning_effort: Optional[str] = None):
         from langchain_openai import ChatOpenAI
 
         model_name = model or os.environ['OPENROUTER_MODEL']
         key = os.environ['OPENROUTER_API_KEY']
         base_url = os.environ['OPENROUTER_BASE_URL']
+        effort = reasoning_effort or os.environ.get('OPENROUTER_REASONING_EFFORT') or None
 
-        self._openrouter_llm = ChatOpenAI(
+        kwargs = dict(
             model=model_name,
             temperature=temperature,
             api_key=key,
             base_url=base_url,
         )
+        if effort:
+            # OpenRouter streams reasoning tokens as `delta.reasoning` when a
+            # thinking-capable model is asked to reason; surfaced by the agent
+            # as intermediate-feedback progress events.
+            kwargs["model_kwargs"] = {"extra_body": {"reasoning": {"effort": effort}}}
+
+        self._openrouter_llm = ChatOpenAI(**kwargs)
 
     def get_llm(self):
         return self._openrouter_llm

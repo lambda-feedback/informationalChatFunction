@@ -1,6 +1,8 @@
-from src.agent.llm_factory import GoogleAILLMs
+from src.agent.llm_factory import OpenRouterLLMs
 from src.agent.prompts import \
     role_prompt, conv_pref_prompt, update_conv_pref_prompt, summary_prompt, update_summary_prompt, summary_system_prompt
+
+from lf_toolkit.evaluation.progress import report_progress
 
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import SystemMessage, RemoveMessage, HumanMessage, AIMessage
@@ -28,10 +30,11 @@ class State(TypedDict):
 
 class BaseAgent:
     def __init__(self):
-        # Main chat LLM — change to GoogleAILLMs(), AzureLLMs(), or OllamaLLMs() if preferred
-        self.llm = GoogleAILLMs().get_llm()
+        # Main chat LLM — OpenRouter so reasoning tokens can be streamed out as
+        # intermediate feedback; change to GoogleAILLMs(), AzureLLMs(), or OllamaLLMs() if preferred
+        self.llm = OpenRouterLLMs().get_llm()
         # Summarisation LLM — can be set to a different/cheaper model than the chat LLM
-        self.summarisation_llm = GoogleAILLMs().get_llm()
+        self.summarisation_llm = OpenRouterLLMs().get_llm()
 
         self.max_messages_to_summarize = 11
         self.role_prompt = role_prompt
@@ -49,7 +52,11 @@ class BaseAgent:
         self.app = workflow.compile()
 
     def call_model(self, state: State, config: RunnableConfig) -> dict:
-        """Invoke the chat LLM with role prompt, optional question context, and conversation summary."""
+        """Invoke the chat LLM with role prompt, optional question context, and conversation summary.
+
+        The reply is streamed so the model's reasoning tokens (when it produces any)
+        can be surfaced as intermediate-feedback progress events via report_progress().
+        """
         system_message = self.role_prompt
 
         context_prompt = config.get("configurable", {}).get("context_prompt", "")
@@ -64,11 +71,34 @@ class BaseAgent:
             system_message += f"## Known conversational style and preferences of the student for this conversation: {conversationalStyle}. \n\nYour answer must be in line with this conversational style."
 
         messages = [SystemMessage(content=system_message)] + state["messages"]
-        response = self.llm.invoke(self._valid(messages))
-        return {"messages": [response]}
+
+        report_progress("Generating response...")
+        content_parts: list[str] = []
+        reasoning_buffer = ""
+        for chunk in self.llm.stream(self._valid(messages)):
+            if chunk.content:
+                content_parts.append(chunk.content)
+
+            reasoning_piece = (
+                chunk.additional_kwargs.get("reasoning_content")
+                or chunk.additional_kwargs.get("reasoning")
+            )
+            if reasoning_piece:
+                reasoning_buffer += reasoning_piece
+                while "\n" in reasoning_buffer:
+                    line, reasoning_buffer = reasoning_buffer.split("\n", 1)
+                    if line:
+                        report_progress("response reasoning", data={"text": line})
+
+        if reasoning_buffer:
+            report_progress("response reasoning", data={"text": reasoning_buffer})
+
+        report_progress("Response ready.")
+        return {"messages": [AIMessage(content="".join(content_parts))]}
 
     def summarize_conversation(self, state: State) -> dict:
         """Summarise history and analyse conversational style when message count exceeds the threshold."""
+        report_progress("Summarising the conversation so far...")
         summary = state.get("summary", "")
         conversationalStyle = state.get("conversationalStyle", "")
 
@@ -81,6 +111,7 @@ class BaseAgent:
         ) if conversationalStyle else self.conversation_preference_prompt
 
         summary_response = self.summarisation_llm.invoke(self._valid(state["messages"][:-1] + [HumanMessage(content=summary_message)]))
+        report_progress("Analysing your conversational style...")
         conversational_style_response = self.summarisation_llm.invoke(self._valid(state["messages"][:-1] + [HumanMessage(content=style_message)]))
 
         delete_messages: list[AllMessageTypes] = [RemoveMessage(id=m.id) for m in state["messages"][:-3]]
@@ -105,6 +136,7 @@ def invoke_base_agent(messages: list, summary: str, conversationalStyle: str, co
     Summarisation and style analysis trigger automatically once message count exceeds max_messages_to_summarize.
     """
     print(f"in invoke_base_agent(), thread_id = {session_id}")
+    report_progress("Reading your message...")
     config: RunnableConfig = {"configurable": {"context_prompt": context_prompt}}
     state = agent.app.invoke(
         State(messages=messages, summary=summary, conversationalStyle=conversationalStyle),

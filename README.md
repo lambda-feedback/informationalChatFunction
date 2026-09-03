@@ -22,11 +22,12 @@ OPENAI_MODEL
 GOOGLE_AI_API_KEY
 GOOGLE_AI_MODEL
 ```
-> If you use OpenRouter:
+> If you use OpenRouter (the default provider):
 ```bash
 OPENROUTER_API_KEY
 OPENROUTER_MODEL
 OPENROUTER_BASE_URL
+OPENROUTER_REASONING_EFFORT   # optional: low|medium|high, enables reasoning-token progress events
 ```
 
 > [!NOTE]
@@ -81,9 +82,13 @@ Also, don't forget to update or delete the Quickstart chapter from the `README.m
 
 To modify the behaviour of the chatbot, simply edit the prompts in `src/agent/prompts.py`. Or if you want to create a custom agent, copy or update the `agent.py` from `src/agent/` and edit it to match your LLM agent requirements. Import the new invocation in the `module.py` file.
 
-Your agent can be based on an LLM hosted anywhere. OpenAI, Google AI, Azure OpenAI, and Ollama are available out of the box via `src/agent/llm_factory.py`, and you can add your own provider there too.
+Your agent can be based on an LLM hosted anywhere. OpenAI, Google AI, Azure OpenAI, Ollama, and OpenRouter are available out of the box via `src/agent/llm_factory.py`, and you can add your own provider there too. The default is **OpenRouter** (`OpenRouterLLMs`) so the model's reasoning tokens can be streamed — swap the class in `agent.py` for another provider if preferred.
 
 The agent uses **two separate LLM instances** — `self.llm` for chat responses and `self.summarisation_llm` for conversation summarisation and style analysis. By default both use the same provider, but you can point them at different models (e.g. a cheaper or faster model for summarisation) by changing the class in `agent.py`.
+
+### Intermediate feedback
+
+While a request is being handled the agent pushes free-form progress events through `lf_toolkit`'s `report_progress()` — `"Reading your message..."`, `"Generating response..."`, `"Summarising the conversation so far..."`, and, when the model produces reasoning, newline-delimited `"response reasoning"` lines (set `OPENROUTER_REASONING_EFFORT` to `low`/`medium`/`high` on a thinking-capable model to enable these). shimmy relays the events to the caller mid-request. It is a no-op when `EVAL_PROGRESS_URL` is not set (local runs, unit tests).
 
 ### Prerequisites
 
