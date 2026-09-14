@@ -121,7 +121,7 @@ Body with optional fields:
       "accessStatus": "a good amount of time spent on this question today.",
       "markedDone": "This question is still being worked on.",
       "currentPart": {
-        "position": 0,
+        "position": 1,
         "timeSpentOnPart": "10 minutes",
         "markedDone": "This part is not marked done.",
         "responseAreas": [
@@ -154,18 +154,18 @@ Body with optional fields:
       "estimatedTime": "15-25 minutes",
       "parts": [
         {
-          "position": 0,
+          "position": 1,
           "content": "<part prompt>",
           "answerContent": "<part answer>",
           "workedSolutionSections": [
-            { "position": 0, "title": "Step 1", "content": "..." }
+            { "position": 1, "title": "Step 1", "content": "..." }
           ],
           "structuredTutorialSections": [
-            { "position": 0, "title": "Hint", "content": "..." }
+            { "position": 1, "title": "Hint", "content": "..." }
           ],
           "responseAreas": [
             {
-              "position": 0,
+              "position": 1,
               "responseType": "EXPRESSION",
               "answer": "<reference answer>",
               "preResponseText": "<label shown before input>"
@@ -177,6 +177,7 @@ Body with optional fields:
   }
 }
 ```
+All `position` and `number` fields are **1-indexed**.
 
 Response:
 
