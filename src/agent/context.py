@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Tuple
 
 
 def parse_json_to_prompt(context: dict, task_progress: dict) -> str:
@@ -11,7 +11,7 @@ def parse_json_to_prompt(context: dict, task_progress: dict) -> str:
     set_data = context.get("set", {})
     current_part = task_progress.get("currentPart", {}) if task_progress else {}
     current_part_position = current_part.get("position")
-    submissions = current_part.get("responseAreas", [])
+    student_work_index = _build_student_work_index(task_progress)
 
     sections = []
 
@@ -63,7 +63,7 @@ def parse_json_to_prompt(context: dict, task_progress: dict) -> str:
         part_position = part.get("position", i + 1)
         is_current = current_part_position == part_position
         time_on_part = current_part.get("timeSpentOnPart") if is_current else None
-        sections.append(_format_part(part, part_position, is_current, time_on_part, submissions))
+        sections.append(_format_part(part, part_position, is_current, time_on_part, student_work_index))
 
     # Combine
     valid_sections = [s.strip() for s in sections if s and s.strip()]
@@ -72,11 +72,34 @@ def parse_json_to_prompt(context: dict, task_progress: dict) -> str:
     return "\n".join(line for line in content.split("\n") if line.strip() or not line).strip()
 
 
+def _build_student_work_index(task_progress: dict) -> Dict[Tuple[int, int], dict]:
+    """Index the reported progress by (part position, response area position)."""
+    if not task_progress:
+        return {}
+
+    reported_parts = []
+    current_part = task_progress.get("currentPart")
+    if current_part:
+        reported_parts.append(current_part)
+    reported_parts.extend(task_progress.get("parts") or [])
+
+    index: Dict[Tuple[int, int], dict] = {}
+    for reported_part in reported_parts:
+        part_position = reported_part.get("position")
+        for j, ra in enumerate(reported_part.get("responseAreas") or []):
+            ra_part_position = ra.get("partPosition", part_position)
+            ra_position = ra.get("position", j + 1)
+            if ra_part_position is None or ra_position is None:
+                continue
+            index[(ra_part_position, ra_position)] = ra
+    return index
+
+
 def _part_letter(position: int) -> str:
     """Map a 1-indexed part position to its letter (1 -> 'a', 2 -> 'b', ...)."""
     return chr(96 + position)
 
-def _format_part(part: dict, part_position: int, is_current: bool, time_on_part: Optional[str], submissions: list) -> str:
+def _format_part(part: dict, part_position: int, is_current: bool, time_on_part: Optional[str], student_work_index: Dict[Tuple[int, int], dict]) -> str:
     letter = _part_letter(part_position)
     status_text = " [CURRENTLY WORKING ON]" if is_current else ""
     header = f"## Part ({letter}){status_text}"
@@ -89,7 +112,7 @@ def _format_part(part: dict, part_position: int, is_current: bool, time_on_part:
     response_areas = []
     for j, ra in enumerate(part.get("responseAreas", [])):
         ra_position = ra.get("position", j + 1)
-        student_work = _get_student_work(ra_position, submissions)
+        student_work = _get_student_work(part_position, ra_position, student_work_index)
         response_areas.append(_format_response_area(ra_position, ra.get("preResponseText"), ra.get("answer"), student_work))
     ra_block = f"\n### Response Areas\n\n{''.join(response_areas)}" if response_areas else ""
 
@@ -110,24 +133,29 @@ def _format_part(part: dict, part_position: int, is_current: bool, time_on_part:
 
     return "\n".join([header, content, ra_block, answer_block, solutions_block, tutorials_block]) + "\n---\n"
 
-def _get_student_work(ra_position: int, submissions: list) -> Dict[str, Any]:
-    """Look up the student's submission for a 1-indexed response area position."""
-    if 1 <= ra_position <= len(submissions):
-        s = submissions[ra_position - 1]
-        latest = s.get("latestSubmission") or {}
-        if latest:
-            return {
-                "has_submissions": True,
-                "latest_response": latest.get("submission"),
-                "latest_feedback": latest.get("feedback"),
-                "total_submissions": s.get("totalSubmissions"),
-                "total_wrong": s.get("wrongSubmissions"),
-            }
-    return {"has_submissions": False}
+def _get_student_work(part_position: int, ra_position: int, student_work_index: Dict[Tuple[int, int], dict]) -> Optional[Dict[str, Any]]:
+    """Look up the student's progress on a 1-indexed part/response area position."""
+    reported = student_work_index.get((part_position, ra_position))
+    if reported is None:
+        return None
 
-def _format_response_area(position: int, task_description: Optional[str], expected_answer: Any, student_work: Dict[str, Any]) -> str:
+    latest = reported.get("latestSubmission") or {}
+    if not latest:
+        return {"has_submissions": False}
+
+    return {
+        "has_submissions": True,
+        "latest_response": latest.get("submission"),
+        "latest_feedback": latest.get("feedback"),
+        "total_submissions": reported.get("totalSubmissions"),
+        "total_wrong": reported.get("wrongSubmissions"),
+    }
+
+def _format_response_area(position: int, task_description: Optional[str], expected_answer: Any, student_work: Optional[Dict[str, Any]]) -> str:
     task_text = f"- Task: {task_description}" if task_description else "- Task: Not specified"
-    if not student_work.get("has_submissions"):
+    if student_work is None:
+        submission_text = "- Student's work on this response area: Not reported"
+    elif not student_work.get("has_submissions"):
         submission_text = "- Student's work on this response area: No response submitted yet"
     else:
         submission_text = (
